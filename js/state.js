@@ -22,11 +22,11 @@ export function getDifficultyTag(difficulty) {
 
 export function generateCalendar() {
     const opponents = [
-        { name: 'Deportivo Ciclón', difficulty: 60 }, { name: 'Atlético Norte', difficulty: 75 },
-        { name: 'Unión FC', difficulty: 65 }, { name: 'Real Ciudad', difficulty: 85 },
-        { name: 'Sportivo Sur', difficulty: 55 }, { name: 'Estrella Roja', difficulty: 70 },
-        { name: 'Titanes', difficulty: 80 }, { name: 'San Martín', difficulty: 78 },
-        { name: 'Los Cóndores', difficulty: 90 }
+        { name: 'Boca Jrs', difficulty: 60 }, { name: 'Racing Club', difficulty: 75 },
+        { name: 'Velez Sarfield', difficulty: 65 }, { name: 'River Plate', difficulty: 85 },
+        { name: 'Bnafield', difficulty: 55 }, { name: 'San lorenzo', difficulty: 70 },
+        { name: 'Huracan', difficulty: 80 }, { name: 'Talleres', difficulty: 78 },
+        { name: 'Tapia Futbol Club', difficulty: 90 }
     ];
     let calendar = [];
     let id = 1;
@@ -50,7 +50,7 @@ export const state = {
     },
 
     career: {
-        club: 'Club Atlético Inicial',
+        club: 'Independiente',
         season: 1,
         currentMatchIndex: 0,
         
