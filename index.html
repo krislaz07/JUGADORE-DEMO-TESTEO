@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Carrera</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="main-menu" class="screen game-window">
+        <h1 class="game-title">Simulador de Carrera</h1>
+        <div class="menu-options stack-menu">
+            <button id="btn-new-career" class="game-btn primary btn-large">Nueva Carrera</button>
+            <button id="btn-continue" class="game-btn secondary btn-large" disabled>Continuar</button>
+            <button id="btn-options" class="game-btn secondary btn-large">Opciones</button>
+            <button id="btn-credits" class="game-btn secondary btn-large">Créditos</button>
+        </div>
+    </div>
+
+    <div id="screen-creation" class="screen game-window" style="display: none;">
+        <div class="screen-header">
+            <h2 class="screen-title">Crear Futbolista</h2>
+            <p style="color: var(--accent); font-size: 14px; margin-top: 5px;">Tu carrera comienza a los 16 años.</p>
+        </div>
+        
+        <div id="form-error-msg" class="error-message" style="display: none;"></div>
+
+        <form id="player-creation-form" novalidate>
+            <div class="creation-layout">
+                <div class="game-panel left-panel">
+                    <div class="avatar-placeholder" id="avatar-preview">
+                        <span class="avatar-icon" id="avatar-initials">?</span>
+                        <span class="avatar-text" id="avatar-nat-flag">FOTO</span>
+                    </div>
+                    
+                    <h3 class="panel-title">Apariencia</h3>
+                    <div class="input-stack">
+                        <select id="pc-piel" class="game-select" required>
+                            <option value="" disabled selected>Color de piel</option>
+                            <option value="Clara">Clara</option>
+                            <option value="Media">Media</option>
+                            <option value="Oscura">Oscura</option>
+                        </select>
+                        <select id="pc-pelo" class="game-select" required>
+                            <option value="" disabled selected>Color de pelo</option>
+                            <option value="Negro">Negro</option>
+                            <option value="Castaño">Castaño</option>
+                            <option value="Rubio">Rubio</option>
+                            <option value="Pelirrojo">Pelirrojo</option>
+                            <option value="Blanco">Blanco</option>
+                        </select>
+                        <select id="pc-peinado" class="game-select" required>
+                            <option value="" disabled selected>Peinado</option>
+                            <option value="Corto">Corto</option>
+                            <option value="Largo">Largo</option>
+                            <option value="Rapado">Rapado</option>
+                            <option value="Rulos">Rulos</option>
+                        </select>
+                        <select id="pc-barba" class="game-select" required>
+                            <option value="" disabled selected>Barba</option>
+                            <option value="Sí">Sí</option>
+                            <option value="No">No</option>
+                        </select>
+                        <select id="pc-ojos" class="game-select" required>
+                            <option value="" disabled selected>Color de ojos</option>
+                            <option value="Marrones">Marrones</option>
+                            <option value="Azules">Azules</option>
+                            <option value="Verdes">Verdes</option>
+                            <option value="Negros">Negros</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="game-panel right-panel">
+                    <h3 class="panel-title">Información Personal</h3>
+                    <div class="input-grid">
+                        <input type="text" id="pc-nombre" class="game-input" placeholder="Nombre" required>
+                        <input type="text" id="pc-apellido" class="game-input" placeholder="Apellido" required>
+                        <select id="pc-nacionalidad" class="game-select" required>
+                            <option value="" disabled selected>Nacionalidad</option>
+                            <option value="Argentina">Argentina</option>
+                            <option value="Brasil">Brasil</option>
+                            <option value="Uruguay">Uruguay</option>
+                            <option value="Chile">Chile</option>
+                            <option value="Colombia">Colombia</option>
+                            <option value="España">España</option>
+                            <option value="Italia">Italia</option>
+                            <option value="Inglaterra">Inglaterra</option>
+                            <option value="Francia">Francia</option>
+                            <option value="Alemania">Alemania</option>
+                        </select>
+                        <!-- Input de edad eliminado -->
+                        <input type="number" id="pc-altura" class="game-input" min="150" max="210" placeholder="Altura (150-210 cm)" required>
+                        <input type="number" id="pc-peso" class="game-input" min="45" max="120" placeholder="Peso (45-120 kg)" required>
+                    </div>
+
+                    <h3 class="panel-title mt-20">Perfil Deportivo</h3>
+                    <div class="input-grid">
+                        <select id="pc-posicion" class="game-select" required>
+                            <option value="" disabled selected>Posición</option>
+                            <option value="Arquero">Arquero</option>
+                            <option value="Lateral Derecho">Lateral Derecho</option>
+                            <option value="Lateral Izquierdo">Lateral Izquierdo</option>
+                            <option value="Defensor Central">Defensor Central</option>
+                            <option value="Mediocampista Defensivo">Mediocampista Defensivo</option>
+                            <option value="Mediocampista Central">Mediocampista Central</option>
+                            <option value="Mediocampista Ofensivo">Mediocampista Ofensivo</option>
+                            <option value="Extremo Derecho">Extremo Derecho</option>
+                            <option value="Extremo Izquierdo">Extremo Izquierdo</option>
+                            <option value="Delantero">Delantero</option>
+                        </select>
+                        <select id="pc-pie" class="game-select" required>
+                            <option value="" disabled selected>Pie hábil</option>
+                            <option value="Derecho">Derecho</option>
+                            <option value="Izquierdo">Izquierdo</option>
+                            <option value="Ambidiestro">Ambidiestro</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-actions-bar">
+                <button type="button" id="btn-back-main" class="game-btn secondary">Volver</button>
+                <button type="submit" class="game-btn primary">Crear Jugador</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="screen-summary" class="screen game-window" style="display: none;">
+        <div class="screen-header">
+            <h2 class="screen-title">Ficha del Jugador</h2>
+        </div>
+        
+        <div class="player-card">
+            <div class="card-header">
+                <div class="card-ovr">
+                    <span id="sum-ovr"></span>
+                    <small id="sum-pos-badge"></small>
+                </div>
+                <div class="card-identity">
+                    <h3 id="sum-name"></h3>
+                    <p id="sum-nat"></p>
+                </div>
+            </div>
+            
+            <div class="card-body">
+                <div class="card-details">
+                    <div><span>Edad</span> <strong id="sum-age"></strong></div>
+                    <div><span>Altura</span> <strong id="sum-height"></strong></div>
+                    <div><span>Peso</span> <strong id="sum-weight"></strong></div>
+                    <div><span>Pie</span> <strong id="sum-foot"></strong></div>
+                </div>
+                
+                <h4 class="card-subtitle">Atributos (⭐ Clave para posición)</h4>
+                <div id="sum-attributes" class="card-attributes-grid"></div>
+            </div>
+        </div>
+        
+        <div class="game-actions-bar">
+            <button id="btn-continue-career" class="game-btn primary">Avanzar Temporada (Fase 3)</button>
+        </div>
+    </div>
+
+    <div id="screen-career-hub" class="screen game-window" style="display: none;">
+        <div class="screen-header">
+            <h2 class="screen-title">Mi Carrera</h2>
+        </div>
+        
+        <div class="creation-layout">
+            <div class="game-panel left-panel">
+                <h3 class="panel-title">Estado del Jugador</h3>
+                <div class="card-ovr" style="margin: 0 auto 15px auto;">
+                    <span id="hub-ovr"></span>
+                    <small id="hub-pos"></small>
+                </div>
+                <h4 class="player-name-display" id="hub-name" style="margin-top: 10px;"></h4>
+                <p style="text-align: center; color: var(--text-muted);"><strong id="hub-club"></strong></p>
+                
+                <!-- FASE 4: Botón de Desarrollo -->
+                <button id="btn-development" class="game-btn secondary" style="width: 100%; margin-top: 10px; margin-bottom: 15px;">Desarrollo (0)</button>
+                
+                <div class="mt-20" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                        <span style="font-size: 11px; color: var(--text-muted); display: block; text-transform: uppercase; margin-bottom: 5px;">Desarrollo</span>
+                        <strong style="color: var(--accent); font-size: 18px; display: block; margin-bottom: 10px;">NIVEL <span id="hub-level">1</span></strong>
+                        <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px;">
+                            <span id="hub-xp-text">0 / 100 XP</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div id="hub-xp-fill" class="progress-bar-fill" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                        <span style="font-size: 11px; color: var(--text-muted); display: block; text-transform: uppercase; margin-bottom: 5px;">Popularidad</span>
+                        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px;">
+                            <strong style="color: #FFD700; font-size: 18px;">FAMA <span id="hub-fama-level">0</span></strong>
+                            <span id="hub-fama-rank" style="color: #FFD700; font-size: 11px; text-transform: uppercase;">Desconocido</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px;">
+                            <span id="hub-fama-text">0 / 10 Pts</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div id="hub-fama-fill" class="progress-bar-fill" style="width: 0%; background: #FFD700; box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-panel right-panel">
+                <h3 class="panel-title">Calendario</h3>
+                <div class="match-banner">
+                    <p>Próximo Partido:</p>
+                    <h2 id="hub-next-match">---</h2>
+                </div>
+
+                <h3 class="panel-title mt-20">Estadísticas de Temporada</h3>
+                <div class="card-details">
+                    <div><span>PJ</span> <strong id="hub-stat-pj">0</strong></div>
+                    <div><span>Goles</span> <strong id="hub-stat-g">0</strong></div>
+                    <div><span>Asist.</span> <strong id="hub-stat-a">0</strong></div>
+                    <div><span>Prom.</span> <strong id="hub-stat-prom">-</strong></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="game-actions-bar">
+            <button id="btn-save-game" class="game-btn secondary">Guardar Partida</button>
+            <button id="btn-play-match" class="game-btn primary">Jugar Partido</button>
+        </div>
+    </div>
+
+    <!-- NUEVO: Pantalla Fase 4: Desarrollo -->
+    <div id="screen-development" class="screen game-window" style="display: none;">
+        <div class="screen-header">
+            <h2 class="screen-title">Desarrollo del Jugador</h2>
+        </div>
+        
+        <div class="creation-layout">
+            <div class="game-panel left-panel" style="text-align: center;">
+                <h3 class="panel-title">Proyección</h3>
+                <div class="card-ovr" style="margin: 0 auto 15px auto;">
+                    <span id="dev-ovr"></span>
+                </div>
+                <p style="color: var(--text-muted); font-size: 14px;">Nivel <strong id="dev-level" style="color: var(--text-main);">1</strong></p>
+                
+                <div style="margin-top: 25px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 8px;">
+                    <h4 style="margin: 0; color: var(--accent); font-size: 18px;">PUNTOS: <span id="dev-points" style="font-size: 24px; color: #fff;">0</span></h4>
+                </div>
+            </div>
+
+            <div class="game-panel right-panel">
+                <h3 class="panel-title">Atributos (⭐ Clave)</h3>
+                <div id="dev-attributes-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto; padding-right: 10px;">
+                    <!-- Se llena con JS -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="game-actions-bar">
+            <button id="btn-dev-cancel" class="game-btn secondary">Cancelar</button>
+            <button id="btn-dev-confirm" class="game-btn primary">Confirmar Desarrollo</button>
+        </div>
+    </div>
+
+    <div id="screen-match" class="screen game-window" style="display: none;">
+        <div class="screen-header" style="border-bottom: none; position: relative;">
+            <h2 class="screen-title" style="font-size: 16px; color: var(--text-muted);">Día de Partido</h2>
+            <h3 id="match-scoreboard" style="font-size: 28px; margin: 10px 0;">MI EQUIPO 0 - 0 RIVAL</h3>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+                <p id="match-time" style="color: var(--accent); font-weight: bold; font-size: 18px; margin: 0;">Minuto: 0'</p>
+                <div class="speed-controls" id="speed-controls">
+                    <button class="game-btn secondary speed-btn active" data-speed="1">1x</button>
+                    <button class="game-btn secondary speed-btn" data-speed="2">2x</button>
+                    <button class="game-btn secondary speed-btn" data-speed="4">4x</button>
+                    <button class="game-btn secondary speed-btn" data-speed="8">8x</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="game-panel match-feed" id="match-events-feed" style="margin-top: 15px;">
+        </div>
+
+        <div class="game-actions-bar match-actions" id="match-actions" style="display: none;">
+            <div id="action-buttons-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; width: 100%;">
+                <!-- Botones inyectados por JS -->
+            </div>
+            
+            <!-- MINIJUEGO DE TIRO (Oculto por defecto) -->
+            <div id="minigame-container" style="display: none; width: 100%; flex-direction: column; align-items: center; padding: 15px; background: rgba(0,0,0,0.5); border-radius: 8px;">
+                <h4 style="margin: 0 0 15px 0; color: var(--accent); text-transform: uppercase;">¡Prepará el remate!</h4>
+                
+                <div class="minigame-bar" id="mg-bar">
+                    <div class="mg-zone-target" id="mg-target-zone"></div>
+                    <div class="mg-zone-perfect" id="mg-perfect-zone"></div>
+                    <div class="mg-cursor" id="mg-cursor"></div>
+                </div>
+                
+                <button id="btn-mg-action" class="game-btn primary btn-large" style="margin-top: 20px; width: 200px;">¡PATEAR!</button>
+            </div>
+        </div>
+
+        <div class="game-actions-bar" id="match-continue-bar" style="display: none;">
+            <button id="btn-finish-match" class="game-btn primary">Finalizar Partido</button>
+        </div>
+    </div>
+
+    <div id="screen-half-time" class="screen game-window" style="display: none;">
+        <div class="screen-header">
+            <h2 class="screen-title">Entretiempo</h2>
+            <h3 id="ht-scoreboard" style="font-size: 24px; margin: 10px 0; color: var(--text-muted);">MI EQUIPO 0 - 0 RIVAL</h3>
+        </div>
+        <div class="game-panel" style="text-align: center; max-width: 450px; margin: 0 auto;">
+            <h3 class="panel-title">Rendimiento Parcial</h3>
+            <div class="card-ovr" style="margin: 0 auto 15px auto; width: 90px; height: 90px;">
+                <span id="ht-rating" style="font-size: 36px;">5.0</span>
+            </div>
+            <p id="ht-stats-txt" style="font-size: 15px; margin-bottom: 25px; line-height: 1.6; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px;"></p>
+            <button id="btn-resume-match" class="game-btn primary" style="width: 100%;">Continuar Segundo Tiempo</button>
+        </div>
+    </div>
+
+    <div id="screen-post-match" class="screen game-window" style="display: none;">
+        <div class="screen-header">
+            <h2 class="screen-title">Resumen del Partido</h2>
+            <h3 id="pm-scoreboard" style="font-size: 20px; margin: 10px 0; color: var(--text-muted);">MI EQUIPO 0 - 0 RIVAL</h3>
+        </div>
+        
+        <div class="creation-layout">
+            <div class="game-panel left-panel" style="text-align: center;">
+                <h3 class="panel-title">Valoración</h3>
+                <div class="card-ovr" style="margin: 0 auto 15px auto; width: 100px; height: 100px;">
+                    <span id="pm-rating" style="font-size: 40px;">0.0</span>
+                </div>
+                <p id="pm-performance-text" style="color: var(--accent); font-weight: bold; margin-bottom: 20px; font-size: 14px;"></p>
+                
+                <h3 class="panel-title">Progresión</h3>
+                <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px; margin-bottom: 15px;">
+                    <h4 style="color: #FFD700; margin: 0 0 5px 0; font-size: 14px;">Fama: <span id="pm-fama-change"></span></h4>
+                </div>
+                
+                <div id="pm-xp-breakdown" style="text-align: left; font-size: 12px; color: var(--text-muted); margin-bottom: 10px; line-height: 1.6;">
+                </div>
+                <h4 style="color: var(--success); margin: 0; font-size: 16px;">Total XP: +<span id="pm-xp-total">0</span></h4>
+            </div>
+
+            <div class="game-panel right-panel">
+                <h3 class="panel-title">Estadísticas del Jugador</h3>
+                <div class="card-details" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 0;">
+                    <div><span>Goles</span> <strong id="pm-stat-goles">0</strong></div>
+                    <div><span>Asistencias</span> <strong id="pm-stat-asist">0</strong></div>
+                    <div><span>Tiros (Al arco)</span> <strong id="pm-stat-tiros">0 (0)</strong></div>
+                    <div><span>Pases (Completados)</span> <strong id="pm-stat-pases">0 (0)</strong></div>
+                    <div><span>Regates (Exitosos)</span> <strong id="pm-stat-regates">0 (0)</strong></div>
+                    <div><span>Entradas (Ganadas)</span> <strong id="pm-stat-entradas">0 (0)</strong></div>
+                    <div><span>Acc. Positivas</span> <strong id="pm-stat-buenas" style="color: var(--success);">0</strong></div>
+                    <div><span>Acc. Negativas</span> <strong id="pm-stat-malas" style="color: var(--error);">0</strong></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="game-actions-bar">
+            <button id="btn-continue-season" class="game-btn primary">Avanzar al Hub</button>
+        </div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

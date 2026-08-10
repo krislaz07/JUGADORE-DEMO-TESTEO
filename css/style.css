@@ -1,0 +1,672 @@
+:root {
+    --bg-color: #0d1117;
+    --panel-bg: rgba(22, 33, 45, 0.9);
+    --panel-border: rgba(255, 255, 255, 0.1);
+    --primary-color: #0056b3;
+    --primary-hover: #004494;
+    --text-main: #ffffff;
+    --text-muted: #a1a1aa;
+    --accent: #00d2ff;
+    --error: #ff4c4c;
+    --success: #00ff88;
+    --card-bg: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    --card-gold: linear-gradient(135deg, #FFD700 0%, #B8860B 100%);
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    background-image: radial-gradient(circle at top center, #1a2333 0%, var(--bg-color) 100%);
+    color: var(--text-main);
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Contenedor principal */
+.game-window {
+    width: 900px;
+    max-width: 95vw;
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    box-sizing: border-box;
+}
+
+.screen-header {
+    text-align: center;
+    margin-bottom: 25px;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 15px;
+}
+
+.game-title, .screen-title {
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* Menú Principal */
+.stack-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+    margin-top: 40px;
+}
+
+.stack-menu .game-btn {
+    width: 300px;
+}
+
+/* Layout Creador y Hub */
+.creation-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 20px;
+}
+
+.game-panel {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.panel-title {
+    font-size: 14px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 5px;
+}
+
+/* Avatar Preview */
+.avatar-placeholder {
+    height: 200px;
+    background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+    border: 2px solid var(--panel-border);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-main);
+    margin-bottom: 20px;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+}
+
+.avatar-icon { 
+    font-size: 56px; 
+    font-weight: bold;
+    color: var(--accent);
+    text-transform: uppercase;
+}
+
+.avatar-text { 
+    font-size: 14px; 
+    letter-spacing: 1px; 
+    margin-top: 10px; 
+    color: var(--text-muted);
+}
+
+/* Formularios */
+.input-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.mt-20 { margin-top: 20px; }
+
+.game-input, .game-select {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-main);
+    padding: 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: all 0.2s;
+}
+
+.game-input:focus, .game-select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 8px rgba(0, 210, 255, 0.2);
+}
+
+.game-select option {
+    background-color: var(--bg-color);
+}
+
+.error-message {
+    background: rgba(255, 76, 76, 0.1);
+    border: 1px solid var(--error);
+    color: #ffb3b3;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 14px;
+}
+
+/* Ficha del Jugador (Resumen y Hub) */
+.player-card {
+    background: var(--card-bg);
+    border: 2px solid #334155;
+    border-radius: 12px;
+    max-width: 500px;
+    margin: 0 auto;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.card-ovr {
+    background: var(--card-gold);
+    color: #000;
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-right: 20px;
+    box-shadow: 0 4px 10px rgba(255, 215, 0, 0.2);
+}
+
+.card-ovr span { font-size: 32px; font-weight: 900; line-height: 1; }
+.card-ovr small { font-size: 14px; font-weight: bold; }
+
+.card-identity h3, .player-name-display {
+    margin: 0 0 5px 0;
+    font-size: 24px;
+    color: var(--text-main);
+    text-align: center;
+}
+
+.card-identity h3 { text-align: left; }
+
+.card-identity p {
+    margin: 0;
+    color: var(--accent);
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 1px;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.card-details {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    text-align: center;
+    margin-bottom: 20px;
+    background: rgba(0,0,0,0.2);
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.card-details div {
+    display: flex;
+    flex-direction: column;
+}
+
+.card-details span { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
+.card-details strong { font-size: 14px; }
+
+.card-subtitle {
+    font-size: 14px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+}
+
+.card-attributes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.card-attributes-grid .attr-row {
+    display: flex;
+    justify-content: space-between;
+    background: rgba(255,255,255,0.03);
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.attr-row strong { color: var(--accent); }
+
+/* Barras de acción y botones */
+.game-actions-bar {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--panel-border);
+}
+
+.game-btn {
+    padding: 12px 25px;
+    font-size: 14px;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 1px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-large {
+    padding: 15px 40px;
+    font-size: 18px;
+}
+
+.game-btn.primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.game-btn.primary:hover:not(:disabled) {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 86, 179, 0.4);
+}
+
+.game-btn.secondary {
+    background-color: transparent;
+    border: 1px solid var(--text-muted);
+    color: var(--text-muted);
+}
+
+.game-btn.secondary:hover {
+    color: white;
+    border-color: white;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.game-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* === NUEVOS ESTILOS FASES DE PARTIDO === */
+
+/* Barra de progreso de XP */
+.progress-bar-bg {
+    width: 100%;
+    height: 12px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.5s ease;
+    box-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
+}
+
+/* Banner Próximo Partido */
+.match-banner {
+    background: linear-gradient(90deg, #0f172a 0%, var(--primary-hover) 100%);
+    padding: 25px 20px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid var(--accent);
+    box-shadow: 0 5px 15px rgba(0, 86, 179, 0.2);
+}
+
+.match-banner p {
+    margin: 0 0 8px 0;
+    color: var(--accent);
+    font-size: 13px;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.match-banner h2 {
+    margin: 0;
+    color: #fff;
+    font-size: 26px;
+    letter-spacing: 1px;
+}
+
+/* Panel de Simulación de Partido (Motor) */
+.match-feed {
+    height: 300px;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.match-event {
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.03);
+    border-left: 4px solid var(--text-muted);
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.4;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.match-event.highlight {
+    border-left-color: var(--accent);
+    background: rgba(0, 210, 255, 0.05);
+}
+
+.match-event.goal {
+    border-left-color: var(--success);
+    background: rgba(0, 255, 136, 0.1);
+    font-weight: bold;
+    color: var(--success);
+}
+
+.match-event.miss {
+    border-left-color: var(--error);
+    background: rgba(255, 76, 76, 0.1);
+}
+
+.match-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    border-top: none;
+    padding-top: 0;
+}
+
+/* Controles de Velocidad */
+.speed-controls {
+    display: flex;
+    gap: 5px;
+}
+
+.speed-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+    min-width: 40px;
+    transition: all 0.2s ease;
+}
+
+.speed-btn.active {
+    background-color: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+    font-weight: bold;
+}
+/* Agrega esto al final de tu style.css existente, no hace falta que reemplaces el resto */
+
+.attr-highlight {
+    color: #FFD700;
+    font-weight: bold;
+}
+
+.attr-dev-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255,255,255,0.03);
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    border-left: 3px solid transparent;
+}
+
+.attr-dev-row:has(.attr-highlight) {
+    border-left-color: #FFD700;
+    background: rgba(255, 215, 0, 0.05);
+}
+
+.btn-small {
+    padding: 4px 10px;
+    font-size: 14px;
+    min-width: 30px;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7); }
+    50% { transform: scale(1.02); box-shadow: 0 0 10px 5px rgba(255, 215, 0, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+}
+
+.pulse-anim {
+    animation: pulse 2s infinite;
+}
+
+/* MINIJUEGO DE TIRO */
+.minigame-bar {
+    width: 100%;
+    max-width: 400px;
+    height: 30px;
+    background: #ff4c4c; /* Zona Roja (Afuera) */
+    border-radius: 6px;
+    position: relative;
+    /* Cambiamos hidden a visible para que el cartel de TU TIRO pueda sobresalir hacia arriba */
+    overflow: visible; 
+    border: 2px solid rgba(255,255,255,0.2);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+}
+
+.mg-zone-target {
+    height: 100%;
+    background: #FFD700; /* Zona Amarilla (Al arco) */
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 1px solid rgba(0,0,0,0.3);
+    border-right: 1px solid rgba(0,0,0,0.3);
+}
+
+.mg-zone-perfect {
+    height: 100%;
+    background: #00ff88; /* Zona Verde (Perfecto/Gol) */
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 0 10px #00ff88;
+}
+
+.mg-cursor {
+    width: 8px;
+    height: 110%;
+    background: #fff;
+    position: absolute;
+    top: -5%;
+    left: 0%;
+    border-radius: 4px;
+    box-shadow: 0 0 8px rgba(255,255,255,0.8);
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* NUEVO: Clases para el cursor congelado y el feedback visual */
+.mg-cursor.frozen {
+    width: 10px;
+    background: #ffffff;
+    box-shadow: 0 0 15px #ffffff, 0 0 5px #000000;
+    z-index: 10;
+}
+
+.mg-cursor-label {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ffffff;
+    color: #000000;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 900;
+    white-space: nowrap;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+}
+
+/* Triangulito del cartel apuntando hacia abajo */
+.mg-cursor-label::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 4px 4px 0;
+    border-style: solid;
+    border-color: #ffffff transparent transparent transparent;
+}
+
+/* Colores dinámicos para el cursor congelado según el resultado del tiro */
+.mg-cursor.frozen.result-perfect {
+    background: #00ff88;
+    box-shadow: 0 0 15px #00ff88, 0 0 5px #000000;
+}
+
+.mg-cursor.frozen.result-target {
+    background: #FFD700;
+    box-shadow: 0 0 15px #FFD700, 0 0 5px #000000;
+}
+
+.mg-cursor.frozen.result-miss {
+    background: #ff4c4c;
+    box-shadow: 0 0 15px #ff4c4c, 0 0 5px #000000;
+}
+
+/* TOOLTIPS PARA ACCIONES */
+.tooltip-btn {
+    position: relative;
+    overflow: visible !important; 
+}
+
+.tooltip-box {
+    visibility: hidden;
+    position: absolute;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 220px;
+    background: rgba(10, 15, 30, 0.95);
+    color: #fff;
+    text-align: center;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid var(--accent);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.7);
+}
+
+.tooltip-btn:hover .tooltip-box {
+    visibility: visible;
+    opacity: 1;
+}
+
+.tooltip-req {
+    color: #FFD700;
+    font-weight: 900;
+    font-size: 11px;
+    display: block;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+.tooltip-desc {
+    color: #e0e0e0;
+    font-size: 12px;
+    line-height: 1.4;
+    display: block;
+}
+
+/* MODO DEBUG PANEL */
+#debug-panel {
+    position: fixed;
+    bottom: 70px;
+    right: 20px;
+    width: 320px;
+    background: rgba(15, 20, 35, 0.95);
+    border: 2px solid #FFD700;
+    border-radius: 8px;
+    padding: 15px;
+    flex-direction: column;
+    z-index: 9998;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+}
+.debug-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 5px;
+}
+.debug-label {
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+.debug-controls {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.debug-val {
+    color: #FFD700;
+    font-weight: bold;
+    width: 25px;
+    text-align: center;
+}
+.d-btn {
+    background: #333;
+    color: white;
+    border: 1px solid #555;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 2px 5px;
+}
+.d-btn:hover { background: #555; }
