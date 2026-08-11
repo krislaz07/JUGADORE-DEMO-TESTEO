@@ -750,3 +750,163 @@ body {
     color: #ffffff;
     margin-left: 15px;
 }
+
+/* Agregá esto al FINAL de tu archivo style.css existente */
+
+/* MODAL DE ACTUACIÓN DEL PARTIDO */
+#match-summary-modal {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+.modal-content {
+    background: rgba(15, 20, 35, 0.95);
+    border: 2px solid #FFD700;
+    border-radius: 12px;
+    padding: 25px;
+    width: 90%;
+    max-width: 350px;
+    color: white;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+    text-align: center;
+}
+.modal-content h3 { color: #FFD700; margin-top: 0; font-size: 22px; }
+.modal-rating { font-size: 32px; margin: 15px 0; }
+.modal-rating span {
+    color: #00ff88;
+    font-weight: 900;
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+.modal-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    text-align: left;
+    margin: 20px 0;
+    font-size: 14px;
+    background: rgba(255,255,255,0.05);
+    padding: 15px;
+    border-radius: 8px;
+}
+.modal-btn {
+    background: #FFD700;
+    color: #000;
+    border: none;
+    padding: 12px 25px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+    text-transform: uppercase;
+}
+.modal-btn:hover { background: #ffea00; }
+
+/* ESTILOS PARA CADENAS VISUALES */
+.match-event.chain-result {
+    color: #a0a0a0;
+    margin-left: 15px;
+    font-style: italic;
+    border-left: 2px solid rgba(255, 255, 255, 0.2);
+    padding-left: 10px;
+    margin-top: -5px;
+}
+.match-event.chain-result-success { color: #00ff88; }
+.match-event.chain-result-miss { color: #ff4c4c; }
+.chain-divider {
+    text-align: center;
+    color: #FFD700;
+    font-size: 11px;
+    letter-spacing: 2px;
+    margin: 10px 0;
+    opacity: 0.8;
+}
+.match-event.chain-scenario {
+    color: #ffffff;
+    margin-left: 15px;
+}
+
+/* CANCHA INTERACTIVA (Selector de Posición) */
+.pitch-selector {
+    position: relative;
+    width: 100%;
+    height: 240px;
+    background: #1a3c28; 
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin-bottom: 15px;
+    user-select: none;
+}
+.pitch-line {
+    position: absolute;
+    background: transparent;
+    border: 1.5px solid rgba(255,255,255,0.25);
+    pointer-events: none;
+    z-index: 1;
+}
+.center-line { top: 50%; left: 0; width: 100%; height: 0; transform: translateY(-50%); }
+.center-circle { top: 50%; left: 50%; width: 60px; height: 60px; border-radius: 50%; transform: translate(-50%, -50%); }
+.penalty-area.top { top: 0; left: 25%; width: 50%; height: 15%; border-top: none; }
+.penalty-area.bottom { bottom: 0; left: 25%; width: 50%; height: 15%; border-bottom: none; }
+
+.pitch-zone {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    position: relative;
+    z-index: 10;
+}
+.pitch-zone span {
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 14px;
+    letter-spacing: 1px;
+    pointer-events: none;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.pitch-zone:hover {
+    background: rgba(255, 215, 0, 0.15);
+}
+.pitch-zone.active {
+    background: rgba(255, 215, 0, 0.35);
+    border-left: 3px solid #FFD700;
+    border-right: 3px solid #FFD700;
+}
+.pitch-zone.active span {
+    background: #FFD700;
+    color: #000;
+    border-color: #FFD700;
+}
+
+.position-info-panel {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    padding: 15px;
+    text-align: center;
+}
+.position-info-panel h4 {
+    color: #FFD700;
+    margin: 0 0 5px 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.pos-info-attrs {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: bold;
+}

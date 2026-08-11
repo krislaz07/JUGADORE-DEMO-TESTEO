@@ -1,4 +1,4 @@
-import { state } from './state.js';
+import { state, normalizePlayerPosition } from './state.js';
 import { PlayerTemplates } from './playerTemplates.js';
 import { CareerManager } from './careerManager.js';
 
@@ -12,7 +12,6 @@ export class DevelopmentManager {
         document.getElementById('screen-career-hub').style.display = 'none';
         document.getElementById('screen-development').style.display = 'block';
         
-        // Copia temporal de los atributos y puntos para experimentar antes de guardar
         this.tempAttributes = { ...state.player.attributes };
         this.tempPoints = state.career.devPoints;
         
@@ -21,20 +20,18 @@ export class DevelopmentManager {
 
     static renderInterface() {
         const player = state.player;
+        normalizePlayerPosition(player);
+
         document.getElementById('dev-level').textContent = state.career.level;
         document.getElementById('dev-points').textContent = this.tempPoints;
         
-        // OVR Dinámico previsualizado
-        const currentTempOVR = PlayerTemplates.calculateOVR(this.tempAttributes, player.personalData.posicion);
+        const currentTempOVR = PlayerTemplates.calculateOVR(this.tempAttributes, player.personalData.posicionBase);
         document.getElementById('dev-ovr').textContent = currentTempOVR;
         
         const container = document.getElementById('dev-attributes-list');
         container.innerHTML = '';
         
-        const highlighted = PlayerTemplates.getHighlightedAttributes(player.personalData.posicion);
-
-        // Estructura lista para futura lógica de edad (ej: atributos que cuestan más o menos dependiendo si es joven o veterano)
-        // Por ahora, costo fijo de 1.
+        const highlighted = PlayerTemplates.getHighlightedAttributes(player.personalData.posicionBase);
         
         PlayerTemplates.attributesList.forEach(attr => {
             const originalVal = player.attributes[attr];
@@ -46,7 +43,7 @@ export class DevelopmentManager {
             
             row.innerHTML = `
                 <div class="${isHighlight ? 'attr-highlight' : ''}" style="flex: 1;">
-                    ${attr} ${isHighlight ? '⭐' : ''}
+                    ${attr} ${isHighlight ? '★' : ''}
                 </div>
                 <div style="font-weight: bold; width: 30px; text-align: center; color: ${tempVal > originalVal ? 'var(--success)' : 'white'}">
                     ${tempVal}
@@ -59,7 +56,6 @@ export class DevelopmentManager {
             container.appendChild(row);
         });
 
-        // Listeners para los botones generados
         container.querySelectorAll('button').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const action = e.target.dataset.action;
@@ -82,9 +78,7 @@ export class DevelopmentManager {
         state.player.attributes = { ...this.tempAttributes };
         state.career.devPoints = this.tempPoints;
         
-        // El OVR impacta permanentemente al jugador
-        state.player.overall = PlayerTemplates.calculateOVR(state.player.attributes, state.player.personalData.posicion);
-
+        state.player.overall = PlayerTemplates.calculateOVR(state.player.attributes, state.player.personalData.posicionBase);
         document.getElementById('screen-development').style.display = 'none';
         document.getElementById('screen-career-hub').style.display = 'block';
         

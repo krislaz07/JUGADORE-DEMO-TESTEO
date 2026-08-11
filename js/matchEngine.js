@@ -1,4 +1,4 @@
-import { state, getDifficultyTag } from './state.js';
+import { state, getDifficultyTag, normalizePlayerPosition } from './state.js';
 import { ScenarioSystem } from './scenarioSystem.js';
 import { currentMatchStats } from './matchStats.js'; 
 
@@ -157,7 +157,9 @@ export class MatchEngine {
     }
 
     static triggerPlayerChance(chainedText = null, forcedQuality = null) {
-        const pos = state.player.personalData.posicion;
+        normalizePlayerPosition(state.player);
+        const posBase = state.player.personalData.posicionBase;
+
         let finalQuality = forcedQuality;
 
         if (!finalQuality) {
@@ -170,7 +172,7 @@ export class MatchEngine {
             finalQuality = qualityData.calidad;
         }
         
-        const scenario = ScenarioSystem.getScenario(pos, finalQuality);
+        const scenario = ScenarioSystem.getScenario(posBase, finalQuality);
 
         if (this.currentSpeed === 8) {
             const autoChoice = scenario.actions[Math.floor(Math.random() * scenario.actions.length)];
@@ -275,7 +277,6 @@ export class MatchEngine {
                 currentMatchStats.add('assists'); 
             }
 
-            // NUEVO: Verificación de Penal Atajado para el Bonus de XP
             if (actionObj.isPenalty) {
                 currentMatchStats.add('penaltiesSaved');
             }
@@ -294,11 +295,14 @@ export class MatchEngine {
 
         } else {
             currentMatchStats.add('badActions');
-            this.printEvent(`↳ ${actionObj.failMsg || "Acción fallida."}`, "chain-result chain-result-miss", true);
-
+            
             if (actionObj.concedesGoalOnFail) {
                 this.opponentScore++;
                 this.updateScoreboard();
+                this.printEvent(`¡GOOOOL de ${this.opponentName}!`, "miss"); 
+                this.printEvent(`↳ ${actionObj.failMsg || "Acción fallida."}`, "chain-result chain-result-miss", true); 
+            } else {
+                this.printEvent(`↳ ${actionObj.failMsg || "Acción fallida."}`, "chain-result chain-result-miss", true);
             }
 
             if (!isAuto && this.chainCount < 2 && actionObj.failChainChance && Math.random() < actionObj.failChainChance) {

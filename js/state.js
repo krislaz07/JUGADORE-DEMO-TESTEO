@@ -36,19 +36,17 @@ export function generateCalendar() {
     return calendar;
 }
 
-// NUEVO: Bandera de Debug
 export const DEBUG_MODE = true; 
 
 export const state = {
     player: null,
-    originalAttributes: null, // NUEVO: Para restaurar valores en debug
+    originalAttributes: null, 
     currentScreen: 'main-menu',
     lastMatchResult: null,
     
     settings: {
         matchSpeed: 1 
     },
-
     career: {
         club: 'Club Atlético Inicial',
         season: 1,
@@ -62,10 +60,34 @@ export const state = {
         famaLevel: 0,
         famaPoints: 0,
         famaToNextLevel: 10,
-
         stats: {
             matchesPlayed: 0, goals: 0, assists: 0, matchRatings: [] 
         },
         calendar: generateCalendar()
     }
 };
+
+export function normalizePlayerPosition(player) {
+    if (!player || !player.personalData) return;
+    
+    if (player.personalData.posicionBase) return;
+
+    const oldPos = player.personalData.posicion;
+    let base = "Delantero";
+    let perfil = "Centro";
+
+    switch(oldPos) {
+        case "Arquero": base = "Arquero"; perfil = "Arquero"; break;
+        case "Defensor Central": base = "Defensa"; perfil = "Central"; break;
+        case "Lateral Derecho": case "Lateral Izquierdo": base = "Defensa"; perfil = "Lateral"; break;
+        case "Mediocampista Defensivo": base = "Mediocampista"; perfil = "Defensivo"; break;
+        case "Mediocampista Central": case "Mediocampista": base = "Mediocampista"; perfil = "Central"; break;
+        case "Mediocampista Ofensivo": base = "Mediocampista"; perfil = "Ofensivo"; break;
+        case "Extremo Derecho": case "Extremo Izquierdo": base = "Delantero"; perfil = "Extremo"; break;
+        case "Delantero": base = "Delantero"; perfil = "Centro"; break;
+    }
+
+    player.personalData.posicionBase = base;
+    player.personalData.perfil = perfil;
+    player.personalData.posicion = base;
+}

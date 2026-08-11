@@ -24,7 +24,6 @@
         </div>
         
         <div id="form-error-msg" class="error-message" style="display: none;"></div>
-
         <form id="player-creation-form" novalidate>
             <div class="creation-layout">
                 <div class="game-panel left-panel">
@@ -70,7 +69,6 @@
                         </select>
                     </div>
                 </div>
-
                 <div class="game-panel right-panel">
                     <h3 class="panel-title">Información Personal</h3>
                     <div class="input-grid">
@@ -89,26 +87,8 @@
                             <option value="Francia">Francia</option>
                             <option value="Alemania">Alemania</option>
                         </select>
-                        <!-- Input de edad eliminado -->
                         <input type="number" id="pc-altura" class="game-input" min="150" max="210" placeholder="Altura (150-210 cm)" required>
                         <input type="number" id="pc-peso" class="game-input" min="45" max="120" placeholder="Peso (45-120 kg)" required>
-                    </div>
-
-                    <h3 class="panel-title mt-20">Perfil Deportivo</h3>
-                    <div class="input-grid">
-                        <select id="pc-posicion" class="game-select" required>
-                            <option value="" disabled selected>Posición</option>
-                            <option value="Arquero">Arquero</option>
-                            <option value="Lateral Derecho">Lateral Derecho</option>
-                            <option value="Lateral Izquierdo">Lateral Izquierdo</option>
-                            <option value="Defensor Central">Defensor Central</option>
-                            <option value="Mediocampista Defensivo">Mediocampista Defensivo</option>
-                            <option value="Mediocampista Central">Mediocampista Central</option>
-                            <option value="Mediocampista Ofensivo">Mediocampista Ofensivo</option>
-                            <option value="Extremo Derecho">Extremo Derecho</option>
-                            <option value="Extremo Izquierdo">Extremo Izquierdo</option>
-                            <option value="Delantero">Delantero</option>
-                        </select>
                         <select id="pc-pie" class="game-select" required>
                             <option value="" disabled selected>Pie hábil</option>
                             <option value="Derecho">Derecho</option>
@@ -116,9 +96,30 @@
                             <option value="Ambidiestro">Ambidiestro</option>
                         </select>
                     </div>
+
+                    <h3 class="panel-title mt-20">Perfil Deportivo (Posición)</h3>
+                    
+                    <div class="pitch-selector" id="pitch-selector">
+                        <div class="pitch-line center-line"></div>
+                        <div class="pitch-line center-circle"></div>
+                        <div class="pitch-line penalty-area top"></div>
+                        <div class="pitch-line penalty-area bottom"></div>
+                        
+                        <div class="pitch-zone" data-pos="Delantero"><span>DL</span></div>
+                        <div class="pitch-zone" data-pos="Mediocampista"><span>MD</span></div>
+                        <div class="pitch-zone" data-pos="Defensa"><span>DEF</span></div>
+                        <div class="pitch-zone" data-pos="Arquero"><span>ARQ</span></div>
+                    </div>
+
+                    <div class="position-info-panel" id="pos-info-panel">
+                        <h4 id="pos-info-title">Seleccioná una posición</h4>
+                        <p id="pos-info-desc" style="font-size: 13px; color: var(--text-muted);">Haz clic en la cancha para elegir tu rol.</p>
+                        <div id="pos-info-attrs" class="pos-info-attrs"></div>
+                    </div>
+
+                    <input type="hidden" id="pc-posicion" required>
                 </div>
             </div>
-
             <div class="game-actions-bar">
                 <button type="button" id="btn-back-main" class="game-btn secondary">Volver</button>
                 <button type="submit" class="game-btn primary">Crear Jugador</button>
@@ -151,7 +152,7 @@
                     <div><span>Pie</span> <strong id="sum-foot"></strong></div>
                 </div>
                 
-                <h4 class="card-subtitle">Atributos (⭐ Clave para posición)</h4>
+                <h4 class="card-subtitle">Atributos (★ Clave para posición)</h4>
                 <div id="sum-attributes" class="card-attributes-grid"></div>
             </div>
         </div>
@@ -176,7 +177,6 @@
                 <h4 class="player-name-display" id="hub-name" style="margin-top: 10px;"></h4>
                 <p style="text-align: center; color: var(--text-muted);"><strong id="hub-club"></strong></p>
                 
-                <!-- FASE 4: Botón de Desarrollo -->
                 <button id="btn-development" class="game-btn secondary" style="width: 100%; margin-top: 10px; margin-bottom: 15px;">Desarrollo (0)</button>
                 
                 <div class="mt-20" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -190,7 +190,6 @@
                             <div id="hub-xp-fill" class="progress-bar-fill" style="width: 0%;"></div>
                         </div>
                     </div>
-
                     <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
                         <span style="font-size: 11px; color: var(--text-muted); display: block; text-transform: uppercase; margin-bottom: 5px;">Popularidad</span>
                         <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px;">
@@ -206,14 +205,12 @@
                     </div>
                 </div>
             </div>
-
             <div class="game-panel right-panel">
                 <h3 class="panel-title">Calendario</h3>
                 <div class="match-banner">
                     <p>Próximo Partido:</p>
                     <h2 id="hub-next-match">---</h2>
                 </div>
-
                 <h3 class="panel-title mt-20">Estadísticas de Temporada</h3>
                 <div class="card-details">
                     <div><span>PJ</span> <strong id="hub-stat-pj">0</strong></div>
@@ -230,7 +227,6 @@
         </div>
     </div>
 
-    <!-- NUEVO: Pantalla Fase 4: Desarrollo -->
     <div id="screen-development" class="screen game-window" style="display: none;">
         <div class="screen-header">
             <h2 class="screen-title">Desarrollo del Jugador</h2>
@@ -248,11 +244,9 @@
                     <h4 style="margin: 0; color: var(--accent); font-size: 18px;">PUNTOS: <span id="dev-points" style="font-size: 24px; color: #fff;">0</span></h4>
                 </div>
             </div>
-
             <div class="game-panel right-panel">
-                <h3 class="panel-title">Atributos (⭐ Clave)</h3>
+                <h3 class="panel-title">Atributos (★ Clave)</h3>
                 <div id="dev-attributes-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto; padding-right: 10px;">
-                    <!-- Se llena con JS -->
                 </div>
             </div>
         </div>
@@ -284,10 +278,8 @@
 
         <div class="game-actions-bar match-actions" id="match-actions" style="display: none;">
             <div id="action-buttons-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; width: 100%;">
-                <!-- Botones inyectados por JS -->
             </div>
             
-            <!-- MINIJUEGO DE TIRO (Oculto por defecto) -->
             <div id="minigame-container" style="display: none; width: 100%; flex-direction: column; align-items: center; padding: 15px; background: rgba(0,0,0,0.5); border-radius: 8px;">
                 <h4 style="margin: 0 0 15px 0; color: var(--accent); text-transform: uppercase;">¡Prepará el remate!</h4>
                 
@@ -321,7 +313,7 @@
         </div>
     </div>
 
-<div id="screen-post-match" class="screen game-window" style="display: none;">
+    <div id="screen-post-match" class="screen game-window" style="display: none;">
         <div class="screen-header">
             <h2 class="screen-title">Recompensas del Partido</h2>
         </div>

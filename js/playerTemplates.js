@@ -1,5 +1,4 @@
 export const PlayerTemplates = {
-    // ELIMINADO: 'Pase Largo'. AGREGADO: 'Mentalidad'
     attributesList: [
         'Velocidad', 'Aceleración', 'Resistencia', 'Fuerza', 'Pase', 'Mentalidad',
         'Técnica', 'Control', 'Regate', 'Visión', 'Definición', 'Potencia de tiro',
@@ -7,31 +6,29 @@ export const PlayerTemplates = {
     ],
     weights: {
         "Arquero": { "Posicionamiento": 3, "Anticipación": 3, "Fuerza": 2, "Pase": 2, "Mentalidad": 1 },
-        "Lateral Derecho": { "Velocidad": 3, "Resistencia": 3, "Marcaje": 2, "Entrada": 2, "Pase": 2 },
-        "Lateral Izquierdo": { "Velocidad": 3, "Resistencia": 3, "Marcaje": 2, "Entrada": 2, "Pase": 2 },
-        "Defensor Central": { "Fuerza": 3, "Marcaje": 3, "Entrada": 3, "Anticipación": 2, "Mentalidad": 2 },
-        "Mediocampista Defensivo": { "Resistencia": 3, "Marcaje": 3, "Posicionamiento": 3, "Entrada": 2, "Mentalidad": 2 },
-        "Mediocampista Central": { "Pase": 3, "Control": 3, "Técnica": 2, "Visión": 2, "Mentalidad": 2 },
-        "Mediocampista Ofensivo": { "Visión": 3, "Pase": 3, "Regate": 3, "Control": 2, "Mentalidad": 2 },
-        "Extremo Derecho": { "Velocidad": 3, "Aceleración": 3, "Regate": 2, "Control": 2, "Técnica": 2 },
-        "Extremo Izquierdo": { "Velocidad": 3, "Aceleración": 3, "Regate": 2, "Control": 2, "Técnica": 2 },
-        "Delantero": { "Definición": 3, "Potencia de tiro": 3, "Regate": 2, "Velocidad": 2, "Aceleración": 2, "Posicionamiento": 2, "Mentalidad": 1 }
+        "Defensa": { "Marcaje": 3, "Entrada": 3, "Fuerza": 3, "Anticipación": 2, "Velocidad": 2, "Resistencia": 2 },
+        "Mediocampista": { "Pase": 3, "Visión": 3, "Control": 3, "Técnica": 2, "Resistencia": 2, "Mentalidad": 2 },
+        "Delantero": { "Definición": 3, "Velocidad": 3, "Aceleración": 3, "Potencia de tiro": 3, "Regate": 2, "Técnica": 2 }
     },
-    getHighlightedAttributes: function(position) {
-        const w = this.weights[position] || {};
+    positionInfo: {
+        "Arquero": { abbr: "ARQ", desc: "La última línea. Posicionamiento, anticipación y fuerza son fundamentales." },
+        "Defensa": { abbr: "DEF", desc: "Tu trabajo es recuperar, anticipar y proteger el arco." },
+        "Mediocampista": { abbr: "MD", desc: "Conectás el equipo. Pase, visión y control son tus principales herramientas." },
+        "Delantero": { abbr: "DL", desc: "Vivís cerca del área. Definición, velocidad y regate son tus principales armas." }
+    },
+    getHighlightedAttributes: function(positionBase) {
+        const w = this.weights[positionBase] || {};
         return Object.keys(w).filter(attr => w[attr] >= 2);
     },
-    calculateOVR: function(attributes, position) {
-        const w = this.weights[position] || {};
+    calculateOVR: function(attributes, positionBase) {
+        const w = this.weights[positionBase] || {};
         let totalWeight = 0;
         let weightedSum = 0;
-
         for (const [attr, val] of Object.entries(attributes)) {
             const weight = w[attr] || 1;
             weightedSum += (val * weight);
             totalWeight += weight;
         }
-        
         return Math.floor(weightedSum / totalWeight);
     }
 };
