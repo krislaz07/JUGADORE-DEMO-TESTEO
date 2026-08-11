@@ -321,42 +321,28 @@
         </div>
     </div>
 
-    <div id="screen-post-match" class="screen game-window" style="display: none;">
+<div id="screen-post-match" class="screen game-window" style="display: none;">
         <div class="screen-header">
-            <h2 class="screen-title">Resumen del Partido</h2>
-            <h3 id="pm-scoreboard" style="font-size: 20px; margin: 10px 0; color: var(--text-muted);">MI EQUIPO 0 - 0 RIVAL</h3>
+            <h2 class="screen-title">Recompensas del Partido</h2>
         </div>
         
-        <div class="creation-layout">
-            <div class="game-panel left-panel" style="text-align: center;">
-                <h3 class="panel-title">Valoración</h3>
-                <div class="card-ovr" style="margin: 0 auto 15px auto; width: 100px; height: 100px;">
-                    <span id="pm-rating" style="font-size: 40px;">0.0</span>
-                </div>
-                <p id="pm-performance-text" style="color: var(--accent); font-weight: bold; margin-bottom: 20px; font-size: 14px;"></p>
-                
-                <h3 class="panel-title">Progresión</h3>
-                <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px; margin-bottom: 15px;">
-                    <h4 style="color: #FFD700; margin: 0 0 5px 0; font-size: 14px;">Fama: <span id="pm-fama-change"></span></h4>
-                </div>
-                
-                <div id="pm-xp-breakdown" style="text-align: left; font-size: 12px; color: var(--text-muted); margin-bottom: 10px; line-height: 1.6;">
-                </div>
-                <h4 style="color: var(--success); margin: 0; font-size: 16px;">Total XP: +<span id="pm-xp-total">0</span></h4>
+        <div class="game-panel" style="max-width: 500px; margin: 0 auto; text-align: center;">
+            <div id="pm-level-up-alert" style="color: var(--success); font-size: 20px; font-weight: bold; margin-bottom: 5px; display: none;">
+                ¡SUBISTE DE NIVEL!
             </div>
-
-            <div class="game-panel right-panel">
-                <h3 class="panel-title">Estadísticas del Jugador</h3>
-                <div class="card-details" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 0;">
-                    <div><span>Goles</span> <strong id="pm-stat-goles">0</strong></div>
-                    <div><span>Asistencias</span> <strong id="pm-stat-asist">0</strong></div>
-                    <div><span>Tiros (Al arco)</span> <strong id="pm-stat-tiros">0 (0)</strong></div>
-                    <div><span>Pases (Completados)</span> <strong id="pm-stat-pases">0 (0)</strong></div>
-                    <div><span>Regates (Exitosos)</span> <strong id="pm-stat-regates">0 (0)</strong></div>
-                    <div><span>Entradas (Ganadas)</span> <strong id="pm-stat-entradas">0 (0)</strong></div>
-                    <div><span>Acc. Positivas</span> <strong id="pm-stat-buenas" style="color: var(--success);">0</strong></div>
-                    <div><span>Acc. Negativas</span> <strong id="pm-stat-malas" style="color: var(--error);">0</strong></div>
-                </div>
+            <div id="pm-dev-points-alert" style="color: #FFD700; font-size: 14px; margin-bottom: 20px; display: none;">
+                Obtuviste +3 Puntos de Desarrollo.
+            </div>
+            
+            <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                <h4 style="margin: 0 0 10px 0; color: var(--accent);">EXPERIENCIA OBTENIDA</h4>
+                <div id="pm-xp-breakdown" style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px; line-height: 1.6; text-align: left;"></div>
+                <h3 style="color: var(--success); margin: 0;">Total XP: +<span id="pm-xp-total">0</span></h3>
+            </div>
+            
+            <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px;">
+                <h4 style="margin: 0 0 10px 0; color: #FFD700;">FAMA OBTENIDA</h4>
+                <div id="pm-fama-change" style="font-size: 18px; font-weight: bold; color: #FFD700;"></div>
             </div>
         </div>
         

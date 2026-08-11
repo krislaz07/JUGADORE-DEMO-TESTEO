@@ -15,12 +15,11 @@ export class MatchEngine {
         this.interval = null;
         this.currentSpeed = state.settings.matchSpeed; 
 
-        // Reseteamos las stats del partido al iniciar
         currentMatchStats.reset();
         
-        // Variables de cadena (Encadenamiento de jugadas)
         this.chainCount = 0;
-        this.potentialAssist = false; // Preparado para simulación de compañeros
+        this.isChainingVisual = false; 
+        this.potentialAssist = false; 
 
         this.mgAnimation = null;
         this.mgCursorPos = 0;
@@ -74,8 +73,8 @@ export class MatchEngine {
         document.getElementById('match-actions').style.display = 'none';
         document.getElementById('match-continue-bar').style.display = 'none';
 
-        const oldEndScreen = document.getElementById('match-end-summary');
-        if (oldEndScreen) oldEndScreen.remove();
+        const oldModal = document.getElementById('match-summary-modal');
+        if (oldModal) oldModal.remove();
 
         const speedBtns = document.querySelectorAll('.speed-btn');
         speedBtns.forEach(btn => {
@@ -102,8 +101,8 @@ export class MatchEngine {
         }
 
         if (this.interventionMinutes.includes(this.minute)) {
-            // Reiniciamos variables de cadena al empezar una jugada nueva
             this.chainCount = 0; 
+            this.isChainingVisual = false;
             this.potentialAssist = false; 
             this.triggerPlayerChance();
             return;
@@ -120,10 +119,9 @@ export class MatchEngine {
         this.printEvent("¡Final del primer tiempo! Los equipos van al descanso.", "highlight");
         
         let tempRating = currentMatchStats.calculateRating();
-        
         document.getElementById('ht-scoreboard').textContent = `${state.career.club} ${this.myScore} - ${this.opponentScore} ${this.opponentName}`;
         document.getElementById('ht-rating').textContent = tempRating;
-        document.getElementById('ht-stats-txt').innerHTML = `Goles: <strong>${currentMatchStats.goals}</strong> | Asistencias: <strong>${currentMatchStats.assists}</strong> | Tiros: <strong>${currentMatchStats.shots}</strong>`;
+        document.getElementById('ht-stats-txt').innerHTML = `Goles: <strong>${currentMatchStats.goals}</strong> | Ocasiones Creadas: <strong>${currentMatchStats.assists}</strong> | Tiros: <strong>${currentMatchStats.shots}</strong>`;
         
         document.getElementById('screen-match').style.display = 'none';
         document.getElementById('screen-half-time').style.display = 'block';
@@ -185,7 +183,13 @@ export class MatchEngine {
 
         const title = chainedText || scenario.title;
         const msg = `${title} - ${scenario.description}`;
-        this.printEvent(msg, "highlight");
+        
+        if (this.isChainingVisual) {
+            this.printRawHTML(`<div class="chain-divider">── MISMA JUGADA ──</div>`);
+            this.printEvent(msg, "chain-scenario", true);
+        } else {
+            this.printEvent(msg, "highlight");
+        }
 
         const actionsContainer = document.getElementById('match-actions');
         const btnContainer = document.getElementById('action-buttons-container');
@@ -241,7 +245,6 @@ export class MatchEngine {
             }
         }
 
-        // --- SISTEMA MATEMÁTICO PURO ---
         let baseStat = 0;
         if (actionObj.calc) {
             for (const [attr, weight] of Object.entries(actionObj.calc)) {
@@ -256,55 +259,64 @@ export class MatchEngine {
         let isSuccess = roll <= finalChance;
         let isCrit = roll <= (finalChance / 2);
 
-        // Intentos
-        if (actionObj.statCategory === 'pass' || actionObj.statCategory === 'assist') {
-            currentMatchStats.add('passesAttempted');
-        }
+        if (actionObj.statCategory === 'pass' || actionObj.statCategory === 'assist') currentMatchStats.add('passesAttempted');
         if (actionObj.statCategory === 'dribble') currentMatchStats.add('dribblesAttempted');
         if (actionObj.statCategory === 'tackle') currentMatchStats.add('tacklesAttempted');
         
         if (isSuccess) {
-            currentMatchStats.add('goodActions');
+            currentMatchStats.add('goodActions'); 
             
-            // Éxitos
-            if (actionObj.statCategory === 'pass' || actionObj.statCategory === 'assist') {
-                currentMatchStats.add('passesCompleted');
-            }
+            if (actionObj.statCategory === 'pass' || actionObj.statCategory === 'assist') currentMatchStats.add('passesCompleted');
             if (actionObj.statCategory === 'dribble') currentMatchStats.add('dribblesCompleted');
             if (actionObj.statCategory === 'tackle') currentMatchStats.add('tacklesWon');
             
-            // Bandera de asistencia (No suma gol automáticamente, espera simulación futura)
             if (actionObj.statCategory === 'assist') {
                 this.potentialAssist = true;
+                currentMatchStats.add('assists'); 
             }
 
-            if (isCrit && actionObj.critSuccessMsg) {
-                this.printEvent(actionObj.critSuccessMsg, "highlight");
-            } else {
-                this.printEvent(actionObj.successMsg || "¡Acción exitosa!", "highlight");
+            // NUEVO: Verificación de Penal Atajado para el Bonus de XP
+            if (actionObj.isPenalty) {
+                currentMatchStats.add('penaltiesSaved');
             }
 
-            // SISTEMA DE CADENAS (Límite estricto de 2 encadenamientos)
+            let successMsg = (isCrit && actionObj.critSuccessMsg) ? actionObj.critSuccessMsg : (actionObj.successMsg || "¡Acción exitosa!");
+            this.printEvent(`↳ ${successMsg}`, "chain-result chain-result-success", true);
+
             if (!isAuto && this.chainCount < 2 && actionObj.chainChance && Math.random() < actionObj.chainChance) {
                 this.chainCount++;
+                this.isChainingVisual = true; 
                 setTimeout(() => {
-                    this.triggerPlayerChance("¡La jugada continúa!", actionObj.chainQuality);
-                }, 1500);
+                    this.triggerPlayerChance(null, actionObj.chainQuality); 
+                }, 1000); 
                 return; 
             }
 
         } else {
             currentMatchStats.add('badActions');
-            this.printEvent(actionObj.failMsg || "Acción fallida.", "miss");
+            this.printEvent(`↳ ${actionObj.failMsg || "Acción fallida."}`, "chain-result chain-result-miss", true);
+
+            if (actionObj.concedesGoalOnFail) {
+                this.opponentScore++;
+                this.updateScoreboard();
+            }
+
+            if (!isAuto && this.chainCount < 2 && actionObj.failChainChance && Math.random() < actionObj.failChainChance) {
+                this.chainCount++;
+                this.isChainingVisual = true; 
+                setTimeout(() => {
+                    this.triggerPlayerChance(null, actionObj.failChainQuality); 
+                }, 1000); 
+                return; 
+            }
         }
 
         if (!isAuto) {
+            this.isChainingVisual = false;
             this.isPaused = false;
             this.startTimer();
         }
     }
-
-    // --- MINIJUEGO DE TIRO ---
 
     static startShootMinigame(shotType = "normal") {
         this.mgShotType = shotType; 
@@ -313,7 +325,7 @@ export class MatchEngine {
         const attrs = state.player.attributes;
         const def = attrs['Definición'];
         
-        const perfectWidth = Math.max(1.2, Math.min(11, 1.2 + (9.8 * Math.pow(def / 99, 0.9)))); 
+        const perfectWidth = Math.max(0.8, Math.min(7.5, 0.8 + (6.7 * Math.pow(def / 99, 0.9)))); 
         const targetWidth = Math.max(15, Math.min(50, 15 + ((def / 100) * 35))); 
         
         this.mgCursorPos = Math.random() < 0.5 ? (10 + (attrs['Control']*0.1)) : (90 - (attrs['Control']*0.1));
@@ -342,21 +354,13 @@ export class MatchEngine {
 
     static updateShootMinigame(timestamp) {
         if (!this.lastTimestamp) this.lastTimestamp = timestamp;
-        
         const deltaTime = timestamp - this.lastTimestamp;
         this.lastTimestamp = timestamp;
-
         const dt = deltaTime / 16.666;
 
         this.mgCursorPos += (this.mgSpeed * dt * this.mgDirection);
-        
-        if (this.mgCursorPos >= 100) {
-            this.mgCursorPos = 100;
-            this.mgDirection = -1;
-        } else if (this.mgCursorPos <= 0) {
-            this.mgCursorPos = 0;
-            this.mgDirection = 1;
-        }
+        if (this.mgCursorPos >= 100) { this.mgCursorPos = 100; this.mgDirection = -1; } 
+        else if (this.mgCursorPos <= 0) { this.mgCursorPos = 0; this.mgDirection = 1; }
         
         document.getElementById('mg-cursor').style.left = `${this.mgCursorPos}%`;
         this.mgAnimation = requestAnimationFrame((ts) => this.updateShootMinigame(ts));
@@ -364,7 +368,6 @@ export class MatchEngine {
 
     static stopShootMinigame(targetW, perfectW) {
         cancelAnimationFrame(this.mgAnimation);
-        
         const btnPatear = document.getElementById('btn-mg-action');
         btnPatear.disabled = true;
 
@@ -374,44 +377,35 @@ export class MatchEngine {
 
         const attrs = state.player.attributes;
         const cursor = this.mgCursorPos;
-        const targetHalf = targetW / 2;
         const perfectHalf = perfectW / 2;
+        const targetHalf = targetW / 2;
         
         let resultType = 'miss'; 
-        if (cursor >= 50 - perfectHalf && cursor <= 50 + perfectHalf) {
-            resultType = 'perfect';
-        } else if (cursor >= 50 - targetHalf && cursor <= 50 + targetHalf) {
-            resultType = 'target';
-        }
+        if (cursor >= 50 - perfectHalf && cursor <= 50 + perfectHalf) resultType = 'perfect';
+        else if (cursor >= 50 - targetHalf && cursor <= 50 + targetHalf) resultType = 'target';
 
-        if (resultType === 'perfect') {
-            cursorEl.classList.add('result-perfect');
-        } else if (resultType === 'target') {
-            cursorEl.classList.add('result-target');
-        } else {
-            cursorEl.classList.add('result-miss');
-        }
+        if (resultType === 'perfect') cursorEl.classList.add('result-perfect');
+        else if (resultType === 'target') cursorEl.classList.add('result-target');
+        else cursorEl.classList.add('result-miss');
 
         if (resultType === 'miss') {
-            this.printEvent("¡Le pegaste mordido! La pelota se va afuera.", "miss");
+            this.printEvent("↳ ¡Le pegaste mordido! La pelota se va afuera.", "chain-result chain-result-miss", true);
             currentMatchStats.add('badActions');
         } else if (resultType === 'perfect') {
             currentMatchStats.add('shotsOnTarget');
-            
             const roll = Math.floor(Math.random() * 100) + 1;
             if (roll <= 97) {
                 this.myScore++;
                 this.updateScoreboard();
-                this.printEvent("¡GOOOOLAZO! Tiro perfecto, la clavaste en el ángulo.", "goal");
+                this.printEvent("↳ ¡GOOOOLAZO! Tiro perfecto, la clavaste en el ángulo.", "chain-result chain-result-success goal", true);
                 currentMatchStats.add('goals');
                 currentMatchStats.add('goodActions');
             } else {
-                this.printEvent("¡TIRO PERFECTO! Pero el arquero rival acaba de sacar una pelota imposible.", "normal");
+                this.printEvent("↳ ¡TIRO PERFECTO! Pero el arquero rival saca una pelota imposible.", "chain-result chain-result-success", true);
                 currentMatchStats.add('goodActions'); 
             }
         } else {
             currentMatchStats.add('shotsOnTarget');
-            
             let playerForce = (attrs['Definición'] * 0.5) + (attrs['Potencia de tiro'] * 0.3) + (attrs['Técnica'] * 0.1) + (attrs['Control'] * 0.1);
             let gkForce = this.difficulty;
             let pChaos = Math.floor(Math.random() * 21) - 10;
@@ -419,12 +413,12 @@ export class MatchEngine {
             let isGoal = (playerForce + pChaos) > (gkForce + gkChaos);
 
             if (!isGoal) {
-                this.printEvent("¡Al arco! Pero gran respuesta del arquero.", "normal");
+                this.printEvent("↳ ¡Al arco! Pero gran respuesta del arquero.", "chain-result chain-result-success", true);
                 currentMatchStats.add('goodActions'); 
             } else {
                 this.myScore++;
                 this.updateScoreboard();
-                this.printEvent("¡GOOOOOL! Buen remate para vencer al portero.", "goal");
+                this.printEvent("↳ ¡GOOOOOL! Buen remate para vencer al portero.", "chain-result chain-result-success goal", true);
                 currentMatchStats.add('goals');
                 currentMatchStats.add('goodActions');
             }
@@ -435,16 +429,29 @@ export class MatchEngine {
             cursorEl.classList.remove('frozen', 'result-perfect', 'result-target', 'result-miss');
             cursorEl.innerHTML = '';
             
+            this.isChainingVisual = false;
             this.isPaused = false;
             this.startTimer();
         }, 2500);
     }
 
-    static printEvent(text, cssClass) {
+    static printRawHTML(htmlContent) {
+        const feed = document.getElementById('match-events-feed');
+        feed.insertAdjacentHTML('beforeend', htmlContent);
+        feed.scrollTop = feed.scrollHeight;
+    }
+
+    static printEvent(text, cssClass, isChainFollowup = false) {
         const feed = document.getElementById('match-events-feed');
         const el = document.createElement('div');
         el.className = `match-event ${cssClass}`;
-        el.textContent = `[${this.minute}'] ${text}`;
+        
+        if (isChainFollowup) {
+            el.innerHTML = text;
+        } else {
+            el.textContent = `[${this.minute}'] ${text}`;
+        }
+        
         feed.appendChild(el);
         feed.scrollTop = feed.scrollHeight; 
     }
@@ -457,34 +464,27 @@ export class MatchEngine {
         clearInterval(this.interval);
         this.printEvent("¡Final del partido! El árbitro señala el medio campo.", "highlight");
         
-        // PANTALLA FINAL
-        const summaryHtml = `
-            <div id="match-end-summary" style="background: rgba(10, 15, 30, 0.95); border: 2px solid var(--accent); border-radius: 8px; padding: 20px; margin-top: 15px; color: white;">
-                <h3 style="text-align: center; color: var(--accent); margin-top: 0;">RESULTADO FINAL</h3>
-                <h2 style="text-align: center; margin: 10px 0;">${state.career.club} ${this.myScore} - ${this.opponentScore} ${this.opponentName}</h2>
-                <hr style="border-color: rgba(255,255,255,0.1); margin: 15px 0;">
-                <h4 style="text-align: center; color: #FFD700; margin-bottom: 15px;">TU ACTUACIÓN</h4>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px;">
-                    <div>⚽ Goles: <strong>${currentMatchStats.goals}</strong></div>
-                    <div>🅰️ Asistencias: <strong>${currentMatchStats.assists}</strong></div>
-                    <div>🎯 Tiros: <strong>${currentMatchStats.shots}</strong></div>
-                    <div>🎯 Tiros al arco: <strong>${currentMatchStats.shotsOnTarget}</strong></div>
-                    <div>✓ Pases ok: <strong>${currentMatchStats.passesCompleted} / ${currentMatchStats.passesAttempted}</strong></div>
-                    <div>✕ Pases fallados: <strong>${currentMatchStats.passesAttempted - currentMatchStats.passesCompleted}</strong></div>
-                    <div>✓ Regates ok: <strong>${currentMatchStats.dribblesCompleted} / ${currentMatchStats.dribblesAttempted}</strong></div>
-                    <div>✕ Regates fallidos: <strong>${currentMatchStats.dribblesAttempted - currentMatchStats.dribblesCompleted}</strong></div>
-                </div>
-                <div style="margin-top: 20px; text-align: center; font-size: 18px;">
-                    Calificación: <strong style="color: #00ff88;">${currentMatchStats.calculateRating()}</strong>
+        const modalHtml = `
+            <div id="match-summary-modal">
+                <div class="modal-content">
+                    <h3>TU ACTUACIÓN</h3>
+                    <div class="modal-rating">⭐ <span>${currentMatchStats.calculateRating()}</span></div>
+                    <div class="modal-stats">
+                        <div>⚽ Goles: <strong>${currentMatchStats.goals}</strong></div>
+                        <div>🅰️ Ocasiones Creadas: <strong>${currentMatchStats.assists}</strong></div>
+                        <div>🎯 Tiros: <strong>${currentMatchStats.shots}</strong></div>
+                        <div>🎯 Al arco: <strong>${currentMatchStats.shotsOnTarget}</strong></div>
+                        <div>✓ Pases: <strong>${currentMatchStats.passesCompleted}/${currentMatchStats.passesAttempted}</strong></div>
+                        <div>✓ Regates: <strong>${currentMatchStats.dribblesCompleted}/${currentMatchStats.dribblesAttempted}</strong></div>
+                        <div>✓ Entradas: <strong>${currentMatchStats.tacklesWon}/${currentMatchStats.tacklesAttempted}</strong></div>
+                        <div>✓ Positivas: <strong>${currentMatchStats.goodActions}</strong></div>
+                        <div>✕ Negativas: <strong>${currentMatchStats.badActions}</strong></div>
+                    </div>
+                    <button class="modal-btn" id="btn-close-modal">CONTINUAR</button>
                 </div>
             </div>
         `;
-        
-        const feed = document.getElementById('match-events-feed');
-        feed.insertAdjacentHTML('beforeend', summaryHtml);
-        feed.scrollTop = feed.scrollHeight; 
-
-        document.getElementById('match-continue-bar').style.display = 'flex';
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
         
         state.lastMatchResult = {
             opponent: this.opponentName,
@@ -492,6 +492,14 @@ export class MatchEngine {
             myScore: this.myScore,
             opponentScore: this.opponentScore,
             playerStats: currentMatchStats 
+        };
+
+        document.getElementById('btn-close-modal').onclick = () => {
+            document.getElementById('match-summary-modal').remove();
+            const btnFinish = document.getElementById('btn-finish-match');
+            if (btnFinish) {
+                btnFinish.click(); 
+            }
         };
     }
 }
