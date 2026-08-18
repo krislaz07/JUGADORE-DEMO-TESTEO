@@ -1,11 +1,12 @@
 import { PlayerGenerator } from './playerGenerator.js';
 import { state } from './state.js';
 import { PlayerTemplates } from './playerTemplates.js';
+import { SeasonManager } from './seasonManager.js'; // IMPORTAR AQUÍ
 
 export class PlayerCreator {
     static init() {
         const form = document.getElementById('player-creation-form');
-        this.setupLivePreview();
+        this.setupSliders();
         this.setupPitchSelector();
 
         if (form) {
@@ -16,25 +17,14 @@ export class PlayerCreator {
         }
     }
 
-    static setupLivePreview() {
-        const inputNombre = document.getElementById('pc-nombre');
-        const inputApellido = document.getElementById('pc-apellido');
-        const selectNacionalidad = document.getElementById('pc-nacionalidad');
-        const avatarInitials = document.getElementById('avatar-initials');
-        const avatarNatFlag = document.getElementById('avatar-nat-flag');
-        
-        const updateAvatar = () => {
-            const n = inputNombre.value.trim().charAt(0).toUpperCase();
-            const a = inputApellido.value.trim().charAt(0).toUpperCase();
-            avatarInitials.textContent = (n || a) ? `${n}${a}` : '?';
-        };
-        const updateNat = () => {
-            avatarNatFlag.textContent = selectNacionalidad.value || 'FOTO';
-        };
-        
-        inputNombre.addEventListener('input', updateAvatar);
-        inputApellido.addEventListener('input', updateAvatar);
-        selectNacionalidad.addEventListener('change', updateNat);
+    static setupSliders() {
+        const altInput = document.getElementById('pc-altura');
+        const pesoInput = document.getElementById('pc-peso');
+        const altVal = document.getElementById('val-altura');
+        const pesoVal = document.getElementById('val-peso');
+
+        if (altInput) altInput.addEventListener('input', (e) => { altVal.textContent = parseFloat(e.target.value).toFixed(2); });
+        if (pesoInput) pesoInput.addEventListener('input', (e) => { pesoVal.textContent = e.target.value; });
     }
 
     static setupPitchSelector() {
@@ -90,32 +80,27 @@ export class PlayerCreator {
             nombre: document.getElementById('pc-nombre').value,
             apellido: document.getElementById('pc-apellido').value,
             nacionalidad: document.getElementById('pc-nacionalidad').value,
-            altura: parseInt(document.getElementById('pc-altura').value),
+            altura: parseFloat(document.getElementById('pc-altura').value),
             peso: parseInt(document.getElementById('pc-peso').value),
             pie: document.getElementById('pc-pie').value,
             
             posicionBase: posInput,
             perfil: perfilesMap[posInput],
-            posicion: posInput,
-
-            apariencia: {
-                piel: document.getElementById('pc-piel').value,
-                pelo: document.getElementById('pc-pelo').value,
-                peinado: document.getElementById('pc-peinado').value,
-                barba: document.getElementById('pc-barba').value,
-                ojos: document.getElementById('pc-ojos').value
-            }
+            posicion: posInput 
         };
         
         const newPlayer = PlayerGenerator.create(formData);
         state.player = newPlayer;
+        
+        // INICIALIZAR LA LIGA (Crea fixture, tabla, y asigna tu club aleatorio 1 de 30)
+        SeasonManager.initializeSeason();
+
         this.showSummaryScreen(newPlayer);
     }
 
     static showSummaryScreen(player) {
         document.getElementById('screen-creation').style.display = 'none';
-        const summaryScreen = document.getElementById('screen-summary');
-        summaryScreen.style.display = 'block';
+        document.getElementById('screen-summary').style.display = 'block';
         
         document.getElementById('sum-ovr').textContent = player.overall;
         document.getElementById('sum-pos-badge').textContent = PlayerTemplates.positionInfo[player.personalData.posicionBase].abbr;
@@ -123,7 +108,7 @@ export class PlayerCreator {
         document.getElementById('sum-name').textContent = `${player.personalData.nombre} ${player.personalData.apellido}`;
         document.getElementById('sum-nat').textContent = player.personalData.nacionalidad;
         document.getElementById('sum-age').textContent = `${player.personalData.edad} años`;
-        document.getElementById('sum-height').textContent = `${player.personalData.altura} cm`;
+        document.getElementById('sum-height').textContent = `${player.personalData.altura} m`;
         document.getElementById('sum-weight').textContent = `${player.personalData.peso} kg`;
         document.getElementById('sum-foot').textContent = player.personalData.pie;
         

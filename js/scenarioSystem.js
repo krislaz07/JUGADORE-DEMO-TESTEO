@@ -5,6 +5,7 @@ export class ScenarioSystem {
         const azar = Math.floor(Math.random() * 31) - 15;
         const presionRival = (opponentDifficulty - 50) * 0.5;
         let puntaje = positioning + azar - presionRival;
+        
         if (contextModifiers.localia) puntaje += contextModifiers.localia;
         puntaje = Math.max(0, Math.min(100, puntaje));
         
@@ -13,6 +14,7 @@ export class ScenarioSystem {
         else if (puntaje <= 54) calidad = "normal";
         else if (puntaje <= 74) calidad = "buena";
         else calidad = "peligrosa";
+        
         return { puntaje, calidad };
     }
 
@@ -22,12 +24,12 @@ export class ScenarioSystem {
         if (validScenarios.length === 0) {
             validScenarios = this.scenarios.filter(s => s.positions.includes(playerPositionBase));
         }
-
+        
         if (validScenarios.length > 1 && this.lastScenarioId) {
             const noRep = validScenarios.filter(s => s.id !== this.lastScenarioId);
             if (noRep.length > 0) validScenarios = noRep;
         }
-
+        
         if (validScenarios.length > 0) {
             const picked = validScenarios[Math.floor(Math.random() * validScenarios.length)];
             this.lastScenarioId = picked.id;
@@ -36,6 +38,102 @@ export class ScenarioSystem {
         
         return this.scenarios.find(s => s.positions.includes(playerPositionBase));
     }
+
+    static generateScenarioOptions(scenario, playerLevel) {
+        if (scenario.type === 'forced') {
+            return [scenario.actions[0]]; 
+        }
+
+        const availableActions = [...scenario.actions];
+        
+        let targetCount = 2; 
+        if (playerLevel >= 11) {
+            targetCount = 3;
+            if (availableActions.length >= 4 && Math.random() < 0.10) {
+                targetCount = 4;
+            }
+        }
+        
+        targetCount = Math.min(targetCount, availableActions.length);
+
+        const categories = {};
+        availableActions.forEach(action => {
+            let cat = action.statCategory || 'other';
+            if (cat === 'assist') cat = 'pass';
+            
+            if (!categories[cat]) categories[cat] = [];
+            categories[cat].push(action);
+        });
+
+        for (const cat in categories) {
+            categories[cat].sort(() => Math.random() - 0.5);
+        }
+
+        const selectedActions = [];
+        let lastCategory = null;
+
+        while (selectedActions.length < targetCount) {
+            const validCats = Object.keys(categories).filter(cat => categories[cat].length > 0);
+            if (validCats.length === 0) break; 
+
+            let pickCat = validCats[0];
+            
+            if (validCats.length > 1) {
+                const diffCats = validCats.filter(cat => cat !== lastCategory);
+                if (diffCats.length > 0) {
+                    pickCat = diffCats[Math.floor(Math.random() * diffCats.length)];
+                } else {
+                    pickCat = validCats[Math.floor(Math.random() * validCats.length)];
+                }
+            }
+
+            selectedActions.push(categories[pickCat].pop());
+            lastCategory = pickCat;
+        }
+
+        return selectedActions.sort(() => Math.random() - 0.5);
+    }
+
+    // NUEVO: Sistema de selección de Situaciones Límite con Peso
+    static getSpecialScenario(playerPositionBase) {
+        let valid = this.specialScenarios.filter(s => s.positions.includes(playerPositionBase));
+        if (valid.length === 0) valid = this.specialScenarios; 
+
+        let totalWeight = valid.reduce((sum, s) => sum + (s.weight || 1), 0);
+        let roll = Math.random() * totalWeight;
+        for (let s of valid) {
+            roll -= (s.weight || 1);
+            if (roll <= 0) return s;
+        }
+        return valid[0];
+    }
+
+    static specialScenarios = [
+        {
+            id: "spec_1", positions: ["Delantero", "Mediocampista", "Defensa", "Arquero"],
+            type: "forced", weight: 2,
+            title: "SITUACIÓN LÍMITE", description: "Quedás mano a mano con el arquero. Tenés el arco completamente de frente.",
+            actions: [
+                { text: "Rematar", type: "action", forceMinigame: true, minigame: "shooting", reqAttr: "Potencia + Definición", desc: "No hay otra opción, tenés que definir.", calc: { "Definición": 0.5, "Potencia de tiro": 0.5 }, statCategory: "shot", chainChance: 0 }
+            ]
+        },
+        {
+            id: "spec_2", positions: ["Delantero", "Mediocampista", "Defensa", "Arquero"],
+            type: "forced", weight: 2,
+            title: "SITUACIÓN LÍMITE", description: "Centro atrás perfecto. La pelota te queda servida frente al arco.",
+            actions: [
+                { text: "Rematar", type: "action", forceMinigame: true, minigame: "shooting", reqAttr: "Definición + Técnica", desc: "No hay otra opción, tenés que definir.", calc: { "Definición": 0.6, "Técnica": 0.2, "Control": 0.2 }, statCategory: "shot", chainChance: 0 }
+            ]
+        },
+        {
+            id: "spec_3", positions: ["Delantero", "Mediocampista", "Defensa", "Arquero"],
+            type: "forced", weight: 1,
+            title: "SITUACIÓN LÍMITE", description: "La defensa no logra despejar y la pelota queda muerta dentro del área.",
+            actions: [
+                { text: "Rematar", type: "action", forceMinigame: true, minigame: "shooting", reqAttr: "Definición + Mentalidad", desc: "No hay otra opción, tenés que definir.", calc: { "Definición": 0.6, "Mentalidad": 0.4 }, statCategory: "shot", chainChance: 0 }
+            ]
+        }
+    ];
 
     static scenarios = [
         // --- ARQUERO ---
@@ -60,9 +158,9 @@ export class ScenarioSystem {
             id: "gk_mn_2", positions: ["Arquero"], quality: ["mala", "normal"],
             title: "Pase atrás comprometido", description: "Tu defensor te la da exigida por la presión del 9 rival.",
             actions: [
-                { text: "Reventar arriba", type: "action", reqAttr: "Fuerza + Pase", desc: "Despejás sin dudar.", calc: { "Fuerza": 0.6, "Pase": 0.4 }, statCategory: "pass", chainChance: 0, successMsg: "Pelotazo a dividir lejos de tu arco.", failMsg: "Le erraste a la pelota y la mandaste al lateral." },
-                { text: "Pase corto al lateral", type: "action", reqAttr: "Pase + Control", desc: "Salís jugando rasante.", calc: { "Pase": 0.6, "Control": 0.4 }, statCategory: "pass", chainChance: 0.3, chainQuality: "normal", failChainChance: 1.0, failChainQuality: "peligrosa", successMsg: "Salida limpia con los pies.", failMsg: "¡Pase interceptado en el borde del área!" },
-                { text: "Amagar al delantero", type: "action", reqAttr: "Control + Pase + Técnica", desc: "Frenás la pelota y dejás pasar de largo al 9.", calc: { "Control": 0.5, "Pase": 0.3, "Técnica": 0.2 }, statCategory: "dribble", chainChance: 1.0, chainQuality: "buena", failChainChance: 1.0, failChainQuality: "peligrosa", successMsg: "¡Hielos en las venas! Lo dejaste pasando de largo.", failMsg: "Te adivinó el amague y te robó la pelota." }
+                { text: "Reventar arriba", type: "action", minigame: "passing", reqAttr: "Fuerza + Pase", desc: "Despejás sin dudar.", calc: { "Fuerza": 0.6, "Pase": 0.4 }, statCategory: "pass", chainChance: 0, successMsg: "Pelotazo a dividir lejos de tu arco.", failMsg: "Le erraste a la pelota y la mandaste al lateral." },
+                { text: "Pase corto al lateral", type: "action", minigame: "passing", reqAttr: "Pase + Control", desc: "Salís jugando rasante.", calc: { "Pase": 0.6, "Control": 0.4 }, statCategory: "pass", chainChance: 0.3, chainQuality: "normal", failChainChance: 1.0, failChainQuality: "peligrosa", successMsg: "Salida limpia con los pies.", failMsg: "¡Pase interceptado en el borde del área!" },
+                { text: "Amagar al delantero", type: "action", minigame: "dribbling", reqAttr: "Control + Pase + Técnica", desc: "Frenás la pelota y dejás pasar de largo al 9.", calc: { "Control": 0.5, "Pase": 0.3, "Técnica": 0.2 }, statCategory: "dribble", chainChance: 1.0, chainQuality: "buena", failChainChance: 1.0, failChainQuality: "peligrosa", successMsg: "¡Hielos en las venas! Lo dejaste pasando de largo.", failMsg: "Te adivinó el amague y te robó la pelota." }
             ]
         },
         {
@@ -83,15 +181,14 @@ export class ScenarioSystem {
                 { text: "Tirarse a la derecha", type: "action", reqAttr: "Anticipación + Mentalidad", desc: "Adivinás que va abierto.", calc: { "Anticipación": 0.6, "Mentalidad": 0.4 }, statCategory: "tackle", chainChance: 0, concedesGoalOnFail: true, isPenalty: true, successMsg: "¡ATAJASTE EL PENAL! Gran estirada abajo a la derecha.", failMsg: "Entró con lo justo por el palo opuesto." }
             ]
         },
-
         // --- DEFENSA ---
         {
             id: "def_mn_1", positions: ["Defensa"], quality: ["mala", "normal", "buena"],
             title: "Salida presionada", description: "Recibís la pelota y el equipo rival presiona alto.",
             actions: [
-                { text: "Pase corto seguro", type: "action", reqAttr: "Pase + Control", desc: "Buscás al pivot en el medio.", calc: { "Pase": 0.6, "Control": 0.4 }, statCategory: "pass", chainChance: 0.3, chainQuality: "normal", successMsg: "Salida prolija rompiendo la primera presión.", failMsg: "Pase defectuoso, pero tu compañero logró rehacerse." },
-                { text: "Reventar", type: "action", reqAttr: "Fuerza + Pase", desc: "No te complicás y la tirás larga.", calc: { "Fuerza": 0.6, "Pase": 0.4 }, statCategory: "pass", chainChance: 0, successMsg: "Despeje largo, a reorganizarse.", failMsg: "Despeje corto que se pierde por un costado." },
-                { text: "Cubrir con el cuerpo", type: "action", reqAttr: "Fuerza + Control", desc: "Buscás la falta a favor.", calc: { "Fuerza": 0.6, "Control": 0.4 }, statCategory: "dribble", chainChance: 0.3, chainQuality: "normal", successMsg: "Ganaste el foul a favor.", failMsg: "Te ganaron con el cuerpo limpiamente." }
+                { text: "Pase corto seguro", type: "action", minigame: "passing", reqAttr: "Pase + Control", desc: "Buscás al pivot en el medio.", calc: { "Pase": 0.6, "Control": 0.4 }, statCategory: "pass", chainChance: 0.3, chainQuality: "normal", successMsg: "Salida prolija rompiendo la primera presión.", failMsg: "Pase defectuoso, pero tu compañero logró rehacerse." },
+                { text: "Reventar", type: "action", minigame: "passing", reqAttr: "Fuerza + Pase", desc: "No te complicás y la tirás larga.", calc: { "Fuerza": 0.6, "Pase": 0.4 }, statCategory: "pass", chainChance: 0, successMsg: "Despeje largo, a reorganizarse.", failMsg: "Despeje corto que se pierde por un costado." },
+                { text: "Cubrir con el cuerpo", type: "action", minigame: "dribbling", reqAttr: "Fuerza + Control", desc: "Buscás la falta a favor.", calc: { "Fuerza": 0.6, "Control": 0.4 }, statCategory: "dribble", chainChance: 0.3, chainQuality: "normal", successMsg: "Ganaste el foul a favor.", failMsg: "Te ganaron con el cuerpo limpiamente." }
             ]
         },
         {
@@ -112,62 +209,62 @@ export class ScenarioSystem {
                 { text: "Achicar espacio", type: "action", reqAttr: "Marcaje + Mentalidad", desc: "Salís a presionar al poseedor para que decida rápido.", calc: { "Marcaje": 0.6, "Mentalidad": 0.4 }, statCategory: "tackle", chainChance: 0, successMsg: "Lo pusiste nervioso y forzaste un mal tiro.", failMsg: "Te pasó en velocidad, aunque tu arquero salvó la situación." }
             ]
         },
-
         // --- MEDIOCAMPISTA ---
         {
             id: "mid_mn_1", positions: ["Mediocampista"], quality: ["mala", "normal"],
             title: "Balón en el círculo central", description: "Recibís con la marca encima y poco espacio.",
             actions: [
-                { text: "Tocar atrás", type: "action", reqAttr: "Pase + Control", desc: "Asegurás con los centrales.", calc: { "Pase": 0.6, "Control": 0.4 }, statCategory: "pass", chainChance: 0.3, chainQuality: "normal", successMsg: "Pase de seguridad completado.", failMsg: "Pase corto impreciso que se va afuera." },
-                { text: "Giro para perfilarse", type: "action", reqAttr: "Control + Técnica", desc: "Amagás el toque atrás y girás hacia adelante.", calc: { "Control": 0.6, "Técnica": 0.4 }, statCategory: "dribble", chainChance: 1.0, chainQuality: "buena", successMsg: "Gran control orientado, limpiaste la zona.", failMsg: "Te leyeron el giro sin consecuencias graves." },
-                { text: "Proteger el balón", type: "action", reqAttr: "Fuerza + Control", desc: "Ponés el cuerpo para esperar que abran la cancha.", calc: { "Fuerza": 0.6, "Control": 0.4 }, statCategory: "dribble", chainChance: 0.5, chainQuality: "normal", successMsg: "Pusiste el cuerpo y forzaste la falta.", failMsg: "Te ganaron la posesión en el medio." }
+                { text: "Tocar atrás", type: "action", minigame: "passing", reqAttr: "Pase + Control", desc: "Asegurás con los centrales.", calc: { "Pase": 0.6, "Control": 0.4 }, statCategory: "pass", chainChance: 0.3, chainQuality: "normal", successMsg: "Pase de seguridad completado.", failMsg: "Pase corto impreciso que se va afuera." },
+                { text: "Giro para perfilarse", type: "action", minigame: "dribbling", reqAttr: "Control + Técnica", desc: "Amagás el toque atrás y girás hacia adelante.", calc: { "Control": 0.6, "Técnica": 0.4 }, statCategory: "dribble", chainChance: 1.0, chainQuality: "buena", successMsg: "Gran control orientado, limpiaste la zona.", failMsg: "Te leyeron el giro sin consecuencias graves." },
+                { text: "Proteger el balón", type: "action", minigame: "dribbling", reqAttr: "Fuerza + Control", desc: "Ponés el cuerpo para esperar que abran la cancha.", calc: { "Fuerza": 0.6, "Control": 0.4 }, statCategory: "dribble", chainChance: 0.5, chainQuality: "normal", successMsg: "Pusiste el cuerpo y forzaste la falta.", failMsg: "Te ganaron la posesión en el medio." }
             ]
         },
         {
             id: "mid_bp_1", positions: ["Mediocampista"], quality: ["buena", "peligrosa"],
             title: "¡Recuperación alta!", description: "El rival quedó mal parado y tenés la pelota a 30 metros del arco.",
             actions: [
-                { text: "Pase filtrado rápido", type: "action", reqAttr: "Visión + Pase", desc: "Buscás al delantero que pica al espacio.", calc: { "Visión": 0.6, "Pase": 0.4 }, statCategory: "assist", chainChance: 0, successMsg: "¡Pase quirúrgico! Dejaste a tu compañero con ventaja.", failMsg: "El pase fue muy exigido y lo cortaron." },
-                { text: "Conducción ofensiva", type: "action", reqAttr: "Aceleración + Control", desc: "Avanzás rápido para atraer marcas.", calc: { "Aceleración": 0.6, "Control": 0.4 }, statCategory: "dribble", chainChance: 1.0, chainQuality: "peligrosa", successMsg: "Fijaste a la defensa y abriste huecos.", failMsg: "La llevaste demasiado y chocaste con un central." },
-                { text: "Cambio de frente", type: "action", reqAttr: "Visión + Pase", desc: "Lanzás cruzado para el extremo libre.", calc: { "Visión": 0.6, "Pase": 0.4 }, statCategory: "pass", chainChance: 1.0, chainQuality: "buena", successMsg: "Balón largo perfecto al pie.", failMsg: "Pelota demasiado larga que sale por el lateral." }
+                { text: "Pase filtrado rápido", type: "action", minigame: "passing", reqAttr: "Visión + Pase", desc: "Buscás al delantero que pica al espacio.", calc: { "Visión": 0.6, "Pase": 0.4 }, statCategory: "assist", chainChance: 0, successMsg: "¡Pase quirúrgico! Dejaste a tu compañero con ventaja.", failMsg: "El pase fue muy exigido y lo cortaron." },
+                { text: "Conducción ofensiva", type: "action", minigame: "dribbling", reqAttr: "Aceleración + Control", desc: "Avanzás rápido para atraer marcas.", calc: { "Aceleración": 0.6, "Control": 0.4 }, statCategory: "dribble", chainChance: 1.0, chainQuality: "peligrosa", successMsg: "Fijaste a la defensa y abriste huecos.", failMsg: "La llevaste demasiado y chocaste con un central." },
+                { text: "Cambio de frente", type: "action", minigame: "passing", reqAttr: "Visión + Pase", desc: "Lanzás cruzado para el extremo libre.", calc: { "Visión": 0.6, "Pase": 0.4 }, statCategory: "pass", chainChance: 1.0, chainQuality: "buena", successMsg: "Balón largo perfecto al pie.", failMsg: "Pelota demasiado larga que sale por el lateral." }
             ]
         },
-
         // --- DELANTERO ---
         {
             id: "att_mn_1", positions: ["Delantero"], quality: ["mala", "normal"],
             title: "Recibís de espaldas", description: "El central rival te respira en la nuca.",
             actions: [
-                { text: "Descargar de primera", type: "action", reqAttr: "Pase + Control", desc: "Rebotás el balón al medio.", calc: { "Pase": 0.6, "Control": 0.4 }, statCategory: "pass", chainChance: 0.3, chainQuality: "normal", successMsg: "Descarga limpia y segura.", failMsg: "Toque impreciso recuperado por la defensa." },
-                { text: "Aguantar con el cuerpo", type: "action", reqAttr: "Fuerza + Control", desc: "Soportás el choque esperando compañía.", calc: { "Fuerza": 0.6, "Control": 0.4 }, statCategory: "dribble", chainChance: 0.4, chainQuality: "normal", successMsg: "Pusiste el cuerpo como un poste.", failMsg: "Te desplazaron fácil." },
-                { text: "Girar rápido", type: "action", reqAttr: "Regate + Técnica", desc: "Buscás quedar de frente.", calc: { "Regate": 0.6, "Técnica": 0.4 }, statCategory: "dribble", chainChance: 1.0, chainQuality: "buena", successMsg: "Giro fantástico, quedaste perfilado.", failMsg: "Te trabaron al girar." }
+                { text: "Descargar de primera", type: "action", minigame: "passing", reqAttr: "Pase + Control", desc: "Rebotás el balón al medio.", calc: { "Pase": 0.6, "Control": 0.4 }, statCategory: "pass", chainChance: 0.3, chainQuality: "normal", successMsg: "Descarga limpia y segura.", failMsg: "Toque impreciso recuperado por la defensa." },
+                { text: "Aguantar con el cuerpo", type: "action", minigame: "dribbling", reqAttr: "Fuerza + Control", desc: "Soportás el choque esperando compañía.", calc: { "Fuerza": 0.6, "Control": 0.4 }, statCategory: "dribble", chainChance: 0.4, chainQuality: "normal", successMsg: "Pusiste el cuerpo como un poste.", failMsg: "Te desplazaron fácil." },
+                { text: "Girar rápido", type: "action", minigame: "dribbling", reqAttr: "Regate + Técnica", desc: "Buscás quedar de frente.", calc: { "Regate": 0.6, "Técnica": 0.4 }, statCategory: "dribble", chainChance: 1.0, chainQuality: "buena", successMsg: "Giro fantástico, quedaste perfilado.", failMsg: "Te trabaron al girar." }
             ]
         },
         {
             id: "att_mn_2", positions: ["Delantero"], quality: ["mala", "normal"],
             title: "Pase impreciso", description: "Te tiran una pedrada difícil de dominar.",
             actions: [
-                { text: "Dormirla en el pie", type: "action", reqAttr: "Control + Técnica", desc: "Buscás bajarla suavemente.", calc: { "Control": 0.6, "Técnica": 0.4 }, statCategory: "dribble", chainChance: 0.5, chainQuality: "normal", successMsg: "Control de terciopelo.", failMsg: "La pelota rebotó a dos metros." },
-                { text: "Tocar forzado", type: "action", reqAttr: "Pase + Anticipación", desc: "La rozás para cambiarla de zona.", calc: { "Pase": 0.6, "Anticipación": 0.4 }, statCategory: "pass", chainChance: 0.3, chainQuality: "normal", successMsg: "Toque utilitario para salvar la jugada.", failMsg: "Regalo al rival sin peligro inminente." },
-                { text: "Control orientado", type: "action", reqAttr: "Control + Velocidad", desc: "Intentás acomodarla hacia adelante.", calc: { "Control": 0.6, "Velocidad": 0.4 }, statCategory: "dribble", chainChance: 1.0, chainQuality: "buena", successMsg: "Control largo que te da ventaja.", failMsg: "Se te fue larga hasta las manos del arquero." }
+                { text: "Dormirla en el pie", type: "action", minigame: "dribbling", reqAttr: "Control + Técnica", desc: "Buscás bajarla suavemente.", calc: { "Control": 0.6, "Técnica": 0.4 }, statCategory: "dribble", chainChance: 0.5, chainQuality: "normal", successMsg: "Control de terciopelo.", failMsg: "La pelota rebotó a dos metros." },
+                { text: "Tocar forzado", type: "action", minigame: "passing", reqAttr: "Pase + Anticipación", desc: "La rozás para cambiarla de zona.", calc: { "Pase": 0.6, "Anticipación": 0.4 }, statCategory: "pass", chainChance: 0.3, chainQuality: "normal", successMsg: "Toque utilitario para salvar la jugada.", failMsg: "Regalo al rival sin peligro inminente." },
+                { text: "Control orientado", type: "action", minigame: "dribbling", reqAttr: "Control + Velocidad", desc: "Intentás acomodarla hacia adelante.", calc: { "Control": 0.6, "Velocidad": 0.4 }, statCategory: "dribble", chainChance: 1.0, chainQuality: "buena", successMsg: "Control largo que te da ventaja.", failMsg: "Se te fue larga hasta las manos del arquero." }
             ]
         },
         {
             id: "att_bp_1", positions: ["Delantero"], quality: ["buena", "peligrosa"],
             title: "¡Hueco en la defensa!", description: "Tenés espacio por el medio hacia el arco.",
             actions: [
-                { text: "Rematar fuerte", type: "shoot", shotType: "power", reqAttr: "Potencia + Definición", desc: "Buscás el gol directo." },
-                { text: "Conducir directo", type: "action", reqAttr: "Aceleración + Control", desc: "Te vas derecho contra el arquero.", calc: { "Aceleración": 0.6, "Control": 0.4 }, statCategory: "dribble", chainChance: 1.0, chainQuality: "peligrosa", successMsg: "Ganaste el mano a mano en velocidad.", failMsg: "Te enredaste con la pelota y la perdiste." },
-                { text: "Pase al vacío", type: "action", reqAttr: "Visión + Pase", desc: "Viste picar a tu compañero al otro palo.", calc: { "Visión": 0.6, "Pase": 0.4 }, statCategory: "assist", chainChance: 0, successMsg: "¡Pase fenomenal! Oportunidad clarísima creada.", failMsg: "El defensor la interceptó milagrosamente." }
+                { text: "Rematar fuerte", type: "action", forceMinigame: true, minigame: "shooting", reqAttr: "Potencia + Definición", desc: "Buscás el gol directo.", calc: { "Definición": 0.5, "Potencia de tiro": 0.5 }, statCategory: "shot", chainChance: 0 },
+                { text: "Probar de afuera", type: "action", forceMinigame: true, minigame: "shooting", reqAttr: "Potencia + Mentalidad", desc: "Adelantás la pelota y rematás.", calc: { "Potencia de tiro": 0.6, "Mentalidad": 0.4 }, statCategory: "shot", chainChance: 0 },
+                { text: "Conducir directo", type: "action", minigame: "dribbling", reqAttr: "Aceleración + Control", desc: "Te vas derecho contra el arquero.", calc: { "Aceleración": 0.6, "Control": 0.4 }, statCategory: "dribble", chainChance: 1.0, chainQuality: "peligrosa", successMsg: "Ganaste el mano a mano en velocidad.", failMsg: "Te enredaste con la pelota y la perdiste." },
+                { text: "Pase al vacío", type: "action", minigame: "passing", reqAttr: "Visión + Pase", desc: "Viste picar a tu compañero al otro palo.", calc: { "Visión": 0.6, "Pase": 0.4 }, statCategory: "assist", chainChance: 0, successMsg: "¡Pase fenomenal! Oportunidad clarísima creada.", failMsg: "El defensor la interceptó milagrosamente." }
             ]
         },
         {
             id: "att_bp_2", positions: ["Delantero"], quality: ["buena", "peligrosa"],
             title: "Mano a mano esquinado", description: "Pisás el área por un costado.",
             actions: [
-                { text: "Tiro colocado", type: "shoot", shotType: "placed", reqAttr: "Definición + Técnica", desc: "Buscás ponerla lejos del arquero." },
-                { text: "Pase de la muerte", type: "action", reqAttr: "Pase + Visión", desc: "La cruzás rasante al segundo palo.", calc: { "Pase": 0.6, "Visión": 0.4 }, statCategory: "assist", chainChance: 0, successMsg: "Pase atrás impecable. Oportunidad inmejorable.", failMsg: "Despejó el zaguero cortando la línea de pase." },
-                { text: "Amagar y enganchar", type: "action", reqAttr: "Regate + Control", desc: "Buscás el penal o abrir el ángulo.", calc: { "Regate": 0.6, "Control": 0.4 }, statCategory: "dribble", chainChance: 1.0, chainQuality: "peligrosa", successMsg: "¡Enganche brillante! Tenés todo el arco a disposición.", failMsg: "El arquero te sacó la pelota de los pies limpiamente." }
+                { text: "Tiro colocado", type: "action", forceMinigame: true, minigame: "shooting", reqAttr: "Definición + Técnica", desc: "Buscás ponerla lejos del arquero.", calc: { "Definición": 0.6, "Técnica": 0.2, "Control": 0.2 }, statCategory: "shot", chainChance: 0 },
+                { text: "Rematar de primera", type: "action", forceMinigame: true, minigame: "shooting", reqAttr: "Definición + Mentalidad", desc: "Le pegás rápido.", calc: { "Definición": 0.6, "Mentalidad": 0.4 }, statCategory: "shot", chainChance: 0 },
+                { text: "Pase de la muerte", type: "action", minigame: "passing", reqAttr: "Pase + Visión", desc: "La cruzás rasante al segundo palo.", calc: { "Pase": 0.6, "Visión": 0.4 }, statCategory: "assist", chainChance: 0, successMsg: "Pase atrás impecable. Oportunidad inmejorable.", failMsg: "Despejó el zaguero cortando la línea de pase." },
+                { text: "Amagar y enganchar", type: "action", minigame: "dribbling", reqAttr: "Regate + Control", desc: "Buscás el penal o abrir el ángulo.", calc: { "Regate": 0.6, "Control": 0.4 }, statCategory: "dribble", chainChance: 1.0, chainQuality: "peligrosa", successMsg: "¡Enganche brillante! Tenés todo el arco a disposición.", failMsg: "El arquero te sacó la pelota de los pies limpiamente." }
             ]
         }
     ];

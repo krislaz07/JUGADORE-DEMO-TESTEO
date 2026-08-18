@@ -16,7 +16,8 @@ export class MatchStats {
         this.tacklesWon = 0;
         this.goodActions = 0;
         this.badActions = 0;
-        this.penaltiesSaved = 0; // NUEVO: Registro de penales atajados
+        this.penaltiesSaved = 0;
+        this.dynamicRating = 6.0; // NUEVO: Sincronización con la media dinámica
     }
 
     add(stat, amount = 1) {
@@ -26,12 +27,18 @@ export class MatchStats {
     }
 
     calculateRating() {
+        // NUEVO: Si existe una media dinámica del partido, es la fuente absoluta de verdad
+        if (this.dynamicRating !== undefined) {
+            return this.dynamicRating.toFixed(1);
+        }
+
+        // Fallback estructural antiguo
         let rating = 6.0 
-            + (this.goals * 1.0) 
-            + (this.assists * 0.8) 
-            + (this.goodActions * 0.2) 
-            - (this.badActions * 0.1);
-        
+             + (this.goals * 1.0) 
+             + (this.assists * 0.8) 
+             + (this.goodActions * 0.2) 
+             - (this.badActions * 0.1);
+             
         return Math.max(1.0, Math.min(10.0, rating)).toFixed(1);
     }
 }

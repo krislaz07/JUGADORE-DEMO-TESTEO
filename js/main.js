@@ -1,11 +1,4 @@
 import { DebugManager } from './debugManager.js';
-
-// ... en alguna parte de tu código de inicio, por ejemplo apenas cargue la app:
-document.addEventListener('DOMContentLoaded', () => {
-    DebugManager.init();
-    // ... tu código existente
-});
-
 import { PlayerCreator } from './playerCreator.js';
 import { CareerManager } from './careerManager.js';
 import { MatchEngine } from './matchEngine.js';
@@ -14,6 +7,8 @@ import { DevelopmentManager } from './developmentManager.js';
 import { state } from './state.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+    DebugManager.init();
+
     const btnNewCareer = document.getElementById('btn-new-career');
     const btnBackMain = document.getElementById('btn-back-main');
     const btnContinueCareer = document.getElementById('btn-continue-career');
@@ -22,7 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnContinueSeason = document.getElementById('btn-continue-season');
     const btnResumeMatch = document.getElementById('btn-resume-match'); 
     
-    // FASE 4: Botones de Desarrollo
     const btnDevelopment = document.getElementById('btn-development');
     const btnDevConfirm = document.getElementById('btn-dev-confirm');
     const btnDevCancel = document.getElementById('btn-dev-cancel');
@@ -51,11 +45,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (btnPlayMatch) {
         btnPlayMatch.addEventListener('click', () => {
-            const nextMatch = state.career.calendar[state.career.currentMatchIndex];
-            if (nextMatch) {
+            const currentMatchday = state.career.fixture[state.career.currentMatchIndex];
+            if (currentMatchday && state.career.currentMatchIndex < 58) {
+                const playerMatch = currentMatchday.find(m => m.home === state.career.club || m.away === state.career.club);
+                const isHome = playerMatch.home === state.career.club;
+                
                 document.getElementById('screen-career-hub').style.display = 'none';
-                document.getElementById('screen-match').style.display = 'block';
-                MatchEngine.init(nextMatch);
+                // CORRECCIÓN: Volvemos a 'block' para respetar tu layout clásico vertical
+                document.getElementById('screen-match').style.display = 'block'; 
+                
+                MatchEngine.init({
+                    opponent: isHome ? playerMatch.away : playerMatch.home,
+                    difficulty: isHome ? playerMatch.awayDiff : playerMatch.homeDiff
+                });
             }
         });
     }
@@ -92,7 +94,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Navegación de Desarrollo
     if (btnDevelopment) {
         btnDevelopment.addEventListener('click', () => {
             DevelopmentManager.openScreen();

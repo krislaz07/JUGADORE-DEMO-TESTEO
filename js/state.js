@@ -14,26 +14,10 @@ export function getFamaRequirement(level) {
 }
 
 export function getDifficultyTag(difficulty) {
-    if (difficulty >= 80) return "Candidato al título";
-    if (difficulty >= 70) return "Equipo fuerte";
-    if (difficulty >= 60) return "Competitivo";
+    if (difficulty >= 85) return "Candidato al título";
+    if (difficulty >= 75) return "Equipo fuerte";
+    if (difficulty >= 65) return "Competitivo";
     return "Equipo débil";
-}
-
-export function generateCalendar() {
-    const opponents = [
-        { name: 'Deportivo Ciclón', difficulty: 60 }, { name: 'Atlético Norte', difficulty: 75 },
-        { name: 'Unión FC', difficulty: 65 }, { name: 'Real Ciudad', difficulty: 85 },
-        { name: 'Sportivo Sur', difficulty: 55 }, { name: 'Estrella Roja', difficulty: 70 },
-        { name: 'Titanes', difficulty: 80 }, { name: 'San Martín', difficulty: 78 },
-        { name: 'Los Cóndores', difficulty: 90 }
-    ];
-    let calendar = [];
-    let id = 1;
-    opponents.forEach(opp => { calendar.push({ id: id++, opponent: opp.name, difficulty: opp.difficulty, played: false, result: null }); });
-    const round2 = [...opponents].reverse();
-    round2.forEach(opp => { calendar.push({ id: id++, opponent: opp.name, difficulty: opp.difficulty, played: false, result: null }); });
-    return calendar;
 }
 
 export const DEBUG_MODE = true; 
@@ -47,8 +31,14 @@ export const state = {
     settings: {
         matchSpeed: 1 
     },
+    
+    debugSettings: {
+        minigameDifficulty: 40 
+    },
+
     career: {
-        club: 'Club Atlético Inicial',
+        club: '', // Asignado dinámicamente al crear
+        clubDifficulty: 50,
         season: 1,
         currentMatchIndex: 0,
         
@@ -63,13 +53,15 @@ export const state = {
         stats: {
             matchesPlayed: 0, goals: 0, assists: 0, matchRatings: [] 
         },
-        calendar: generateCalendar()
+        
+        // NUEVAS PROPIEDADES LIGA
+        fixture: [],
+        standings: []
     }
 };
 
 export function normalizePlayerPosition(player) {
     if (!player || !player.personalData) return;
-    
     if (player.personalData.posicionBase) return;
 
     const oldPos = player.personalData.posicion;
